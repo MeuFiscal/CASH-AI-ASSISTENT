@@ -206,8 +206,8 @@ export function Finances() {
                           <span className={`font-bold text-[16px] ${tx.type === 'income' ? 'text-[#10B981]' : 'text-[#ef4444]'}`}>
                             {tx.type === 'income' ? '+' : '-'} {formatCurrency(Number(tx.amount))}
                           </span>
-                          <span className={`text-[12px] font-semibold mt-0.5 ${tx.status === 'paid' ? 'text-[#10B981]' : 'text-[#F59E0B]'}`}>
-                            {tx.status === 'paid' ? 'Pago' : 'Pendente'}
+                          <span className={`text-[12px] font-semibold mt-0.5 ${(tx.status === 'paid' || tx.status === 'completed') ? 'text-[#10B981]' : 'text-[#F59E0B]'}`}>
+                            {(tx.status === 'paid' || tx.status === 'completed') ? 'Pago' : 'Pendente'}
                           </span>
                         </div>
                       </div>
