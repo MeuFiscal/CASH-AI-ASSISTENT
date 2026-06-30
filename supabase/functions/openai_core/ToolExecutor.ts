@@ -215,25 +215,27 @@ export class ToolExecutor {
     if (end_time) {
       const parsedEnd = new Date(end_time);
       if (isNaN(parsedEnd.getTime())) {
-         return "ERRO DE FORMATO: A data de término (end_time) é inválida. Você deve enviar estritamente no formato ISO 8601.";
+         // Fallback to 1 hour after start_time if AI struggles
+         endDate = new Date(startDate.getTime() + 60 * 60 * 1000).toISOString();
+      } else {
+         endDate = parsedEnd.toISOString();
       }
-      endDate = parsedEnd.toISOString();
     }
 
     const { error } = await this.supabase.from('calendar_events').insert({
       workspace_id: workspaceId,
       title,
-      description,
-      location,
+      description: description || null,
+      location: location || null,
       start_time: startDate.toISOString(),
       end_time: endDate
     });
 
     if (error) {
-      throw new Error(`Erro ao criar evento: ${error.message}`);
+      return `Erro no banco de dados ao criar evento: ${error.message}. Talvez uma restrição de RLS ou formato.`;
     }
 
-    return `Evento '${title}' criado com sucesso para ${startDate.toISOString()}.`;
+    return `Evento '${title}' criado com sucesso no banco de dados para ${startDate.toISOString()}.`;
   }
 
   private async consultAgenda(args: any, workspaceId: string): Promise<string> {
