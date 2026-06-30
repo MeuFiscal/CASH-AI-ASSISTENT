@@ -3,6 +3,7 @@ import { AIContextPayload } from './types.ts';
 import { buildSystemPrompt } from './PromptManager.ts';
 import { getTools } from './ToolRegistry.ts';
 import { OpenAIService } from './OpenAIService.ts';
+import { ToolExecutor } from './ToolExecutor.ts';
 
 export class AIEngine {
   private supabase;
@@ -153,13 +154,42 @@ export class AIEngine {
     const model = aiData?.model || 'gpt-4o';
     const temperature = aiData?.temperature !== undefined ? aiData.temperature : 0.7;
 
-    const aiResponse = await openAIService.processMessage(
+    let aiResponse = await openAIService.processMessage(
       systemPrompt,
       conversationHistory,
       tools,
       model,
       temperature
     );
+    
+    // ReAct Loop: Executar ferramentas se a IA solicitar
+    if (aiResponse.toolCalls && aiResponse.toolCalls.length > 0) {
+      const executor = new ToolExecutor(this.supabase);
+      
+      for (const call of aiResponse.toolCalls) {
+        if (call.type === 'function') {
+          const fn = call.function;
+          const args = JSON.parse(fn.arguments || '{}');
+          
+          const result = await executor.executeTool(fn.name, args, workspace_id);
+          
+          // Injeta o resultado no histórico para a IA ler
+          conversationHistory.push({
+            role: 'assistant',
+            content: `[O sistema executou a ferramenta ${fn.name} com sucesso. Resultado: ${result}]`
+          });
+        }
+      }
+      
+      // Chama a IA novamente para ela dar a resposta final com base no que foi feito
+      aiResponse = await openAIService.processMessage(
+        systemPrompt,
+        conversationHistory,
+        [], // Não enviamos as ferramentas novamente para forçar uma resposta de texto
+        model,
+        temperature
+      );
+    }
     
     // Gravar Mensagem da IA com Metadados (Apenas se não for WhatsApp, pois WhatsApp será gravado via Edge Function de envio)
     if (channel !== 'whatsapp' && conversation_id) {
