@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
-import { Send, Paperclip, Mic, CheckCircle2 } from 'lucide-react';
+import { Send, Paperclip, Mic } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib';
 import { PageContainer } from '@/components/PageContainer';
