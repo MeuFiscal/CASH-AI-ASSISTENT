@@ -43,14 +43,14 @@ export function Landing() {
           <Brain className="w-6 h-6 text-[#3B82F6]" />
           <span className="font-bold text-[15px] tracking-tight text-white">Cash AI</span>
         </div>
-        <div className="hidden md:flex items-center gap-8 text-[13px] font-medium text-[#A8B3CF]">
+        <div className="flex items-center gap-3 md:gap-8 text-[10px] md:text-[13px] font-medium text-[#A8B3CF]">
           <Link to={ROUTES.RECURSOS} className="hover:text-white transition-colors">Recursos</Link>
           <Link to={ROUTES.INTEGRACOES} className="hover:text-white transition-colors">Integrações</Link>
           <Link to={ROUTES.PRECOS} className="hover:text-white transition-colors">Preços</Link>
           <Link to={ROUTES.EMPRESA} className="hover:text-white transition-colors">Empresa</Link>
           <button 
             onClick={() => setIsOnboarding(true)}
-            className="hover:text-white transition-colors text-[#3B82F6]"
+            className="hover:text-white transition-colors text-[#3B82F6] hidden md:block"
           >
             Começar Agora
           </button>
@@ -126,7 +126,18 @@ export function Landing() {
           </div>
 
         </div>
+      </div>
 
+      {/* ── Footer / Rodapé ── */}
+      <div className={cn(
+        "w-full py-6 flex flex-col items-center justify-center gap-3 text-[10px] md:text-[11px] text-[#A8B3CF]/50 relative z-20",
+        isOnboarding ? "opacity-0 pointer-events-none absolute" : "opacity-100"
+      )}>
+        <div className="flex gap-4">
+          <Link to={ROUTES.TERMOS} className="hover:text-[#A8B3CF] transition-colors">Termos de Uso</Link>
+          <Link to={ROUTES.PRIVACIDADE} className="hover:text-[#A8B3CF] transition-colors">Política de Privacidade</Link>
+        </div>
+        <span>© {new Date().getFullYear()} Cash AI. Todos os direitos reservados.</span>
       </div>
 
       {/* ── Back Button ── */}

@@ -52,6 +52,20 @@ export const router = createBrowserRouter([
     },
   },
   {
+    path: ROUTES.PRIVACIDADE,
+    lazy: async () => {
+      const { PrivacyPolicyPage } = await import('@/features/landing');
+      return { Component: PrivacyPolicyPage };
+    },
+  },
+  {
+    path: ROUTES.TERMOS,
+    lazy: async () => {
+      const { TermsOfUsePage } = await import('@/features/landing');
+      return { Component: TermsOfUsePage };
+    },
+  },
+  {
     path: '/auth',
     lazy: async () => {
       const { AuthLayout } = await import('@/features/auth/AuthLayout');

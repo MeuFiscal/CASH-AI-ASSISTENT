@@ -16,6 +16,8 @@ export const ROUTES = {
   EMPRESA: '/empresa',
   DEMO: '/demo',
   DASHBOARD: '/dashboard',
+  PRIVACIDADE: '/privacidade',
+  TERMOS: '/termos',
 } as const;
 
 /**
