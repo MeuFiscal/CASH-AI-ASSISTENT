@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
-import { Calendar, Clock, MapPin, CheckCircle, Circle, ArrowRight } from 'lucide-react';
+import { Calendar, Clock, MapPin, CheckCircle, Circle } from 'lucide-react';
 import { PageContainer } from '@/components/PageContainer';
 import { PageHeader } from '@/components/PageHeader';
 import { PageSection } from '@/components/PageSection';
