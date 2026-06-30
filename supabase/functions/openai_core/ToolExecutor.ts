@@ -18,6 +18,10 @@ export class ToolExecutor {
           return await this.checkBalance(workspaceId);
         case 'gerar_relatorio':
           return await this.generateReport(args, workspaceId);
+        case 'criar_evento':
+          return await this.createEvent(args, workspaceId);
+        case 'consultar_agenda':
+          return await this.consultAgenda(args, workspaceId);
         default:
           return `Aviso: A ferramenta ${toolName} ainda não está totalmente implementada no backend. Informe ao usuário que você não pode buscar ou realizar essa ação real no momento.`;
       }
@@ -193,5 +197,54 @@ export class ToolExecutor {
     });
     
     return `RELATÓRIO REAL DO BANCO DE DADOS (USE APENAS ESTES DADOS):\n${formattedData.join('\n')}`;
+  }
+
+  private async createEvent(args: any, workspaceId: string): Promise<string> {
+    const { title, start_time, end_time, description, location } = args;
+    
+    if (!title || !start_time) {
+      throw new Error('Title and start_time are required.');
+    }
+
+    const { error } = await this.supabase.from('calendar_events').insert({
+      workspace_id: workspaceId,
+      title,
+      description,
+      location,
+      start_time: new Date(start_time).toISOString(),
+      end_time: end_time ? new Date(end_time).toISOString() : null
+    });
+
+    if (error) {
+      throw new Error(`Erro ao criar evento: ${error.message}`);
+    }
+
+    return `Evento '${title}' criado com sucesso para ${start_time}.`;
+  }
+
+  private async consultAgenda(args: any, workspaceId: string): Promise<string> {
+    const { date } = args;
+    
+    let query = this.supabase.from('calendar_events').select('*').eq('workspace_id', workspaceId);
+    
+    if (date) {
+      const d = new Date(date);
+      d.setHours(0,0,0,0);
+      const endD = new Date(d);
+      endD.setHours(23,59,59,999);
+      query = query.gte('start_time', d.toISOString()).lte('start_time', endD.toISOString());
+    } else {
+      const d = new Date();
+      d.setHours(0,0,0,0);
+      query = query.gte('start_time', d.toISOString());
+    }
+    
+    const { data, error } = await query;
+    if (error) return `Erro ao consultar agenda: ${error.message}`;
+    
+    if (!data || data.length === 0) return "Nenhum compromisso encontrado.";
+    
+    const formatted = data.map(e => `[${e.start_time}] ${e.title}`);
+    return `Compromissos reais na agenda:\n${formatted.join('\n')}`;
   }
 }
