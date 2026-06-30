@@ -206,20 +206,34 @@ export class ToolExecutor {
       throw new Error('Title and start_time are required.');
     }
 
+    const startDate = new Date(start_time);
+    if (isNaN(startDate.getTime())) {
+      return "ERRO DE FORMATO: A data de início (start_time) é inválida. Você deve enviar estritamente no formato ISO 8601 (Exemplo: 2026-07-01T10:00:00Z). Tente novamente usando o formato correto.";
+    }
+
+    let endDate = null;
+    if (end_time) {
+      const parsedEnd = new Date(end_time);
+      if (isNaN(parsedEnd.getTime())) {
+         return "ERRO DE FORMATO: A data de término (end_time) é inválida. Você deve enviar estritamente no formato ISO 8601.";
+      }
+      endDate = parsedEnd.toISOString();
+    }
+
     const { error } = await this.supabase.from('calendar_events').insert({
       workspace_id: workspaceId,
       title,
       description,
       location,
-      start_time: new Date(start_time).toISOString(),
-      end_time: end_time ? new Date(end_time).toISOString() : null
+      start_time: startDate.toISOString(),
+      end_time: endDate
     });
 
     if (error) {
       throw new Error(`Erro ao criar evento: ${error.message}`);
     }
 
-    return `Evento '${title}' criado com sucesso para ${start_time}.`;
+    return `Evento '${title}' criado com sucesso para ${startDate.toISOString()}.`;
   }
 
   private async consultAgenda(args: any, workspaceId: string): Promise<string> {
