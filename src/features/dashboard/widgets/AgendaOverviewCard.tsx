@@ -22,7 +22,35 @@ export function AgendaOverviewCard() {
 
   const agenda = data?.agenda || [];
 
-  if (status === 'empty' || agenda.length === 0) {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  
+  const tomorrowStart = new Date(todayStart);
+  tomorrowStart.setDate(tomorrowStart.getDate() + 1);
+  
+  const dayAfterTomorrowStart = new Date(tomorrowStart);
+  dayAfterTomorrowStart.setDate(dayAfterTomorrowStart.getDate() + 1);
+
+  const todayEvents = agenda.filter(e => {
+    const d = new Date(e.time);
+    return d >= todayStart && d < tomorrowStart;
+  });
+
+  const tomorrowEvents = agenda.filter(e => {
+    const d = new Date(e.time);
+    return d >= tomorrowStart && d < dayAfterTomorrowStart;
+  });
+
+  // Determinar o que exibir
+  let displayEvents = todayEvents;
+  let title = "Agenda (Hoje)";
+
+  if (todayEvents.length === 0 && tomorrowEvents.length > 0) {
+    displayEvents = tomorrowEvents;
+    title = "Agenda (Amanhã)";
+  }
+
+  if (status === 'empty' || (todayEvents.length === 0 && tomorrowEvents.length === 0)) {
     return (
       <DashboardCard className="p-0 border-[#3B82F6]/20 bg-gradient-to-br from-[#181C28] to-[#0B1221] relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-32 h-32 bg-[#3B82F6]/5 rounded-full blur-[50px]" />
@@ -52,11 +80,11 @@ export function AgendaOverviewCard() {
           <div className="p-1.5 rounded-lg bg-[#8B5CF6]/10">
             <Calendar className="w-4 h-4" />
           </div>
-          <h3 className="font-semibold text-[14px] tracking-wide text-white uppercase">Agenda (Hoje)</h3>
+          <h3 className="font-semibold text-[14px] tracking-wide text-white uppercase">{title}</h3>
         </div>
 
         <div className="flex flex-col gap-3">
-          {agenda.map((event, i) => (
+          {displayEvents.map((event, i) => (
             <div key={event.id || i} className="flex items-start gap-4 p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.04] transition-colors group/item cursor-pointer">
               <div className="flex flex-col items-center min-w-[50px]">
                 <span className="text-[13px] font-bold text-[#A8B3CF] group-hover/item:text-white transition-colors">
