@@ -16,8 +16,10 @@ export class ToolExecutor {
           return await this.createTransaction(args, workspaceId, 'expense');
         case 'consultar_saldo':
           return await this.checkBalance(workspaceId);
+        case 'gerar_relatorio':
+          return await this.generateReport(args, workspaceId);
         default:
-          return `Tool ${toolName} executada (simulação). Argumentos: ${JSON.stringify(args)}`;
+          return `Aviso: A ferramenta ${toolName} ainda não está totalmente implementada no backend. Informe ao usuário que você não pode buscar ou realizar essa ação real no momento.`;
       }
     } catch (error: any) {
       console.error(`[ToolExecutor] Erro ao executar ${toolName}:`, error.message);
@@ -166,5 +168,30 @@ export class ToolExecutor {
 
     const balances = data.map(acc => `${acc.name}: R$ ${acc.balance}`).join(', ');
     return `Saldo atual das contas: ${balances}`;
+  }
+
+  private async generateReport(args: any, workspaceId: string): Promise<string> {
+    const { start_date, end_date } = args;
+    
+    let query = this.supabase.from('transactions').select('amount, type, description, date, categories(name)').eq('workspace_id', workspaceId);
+    
+    if (start_date) query = query.gte('date', start_date);
+    if (end_date) query = query.lte('date', end_date);
+    
+    const { data, error } = await query;
+    if (error) {
+      return `Erro ao buscar transações reais: ${error.message}`;
+    }
+    
+    if (!data || data.length === 0) {
+      return "Não foram encontradas transações (receitas ou despesas) para este período no banco de dados. Informe o usuário que não há registros.";
+    }
+    
+    const formattedData = data.map(t => {
+      const catName = t.categories ? (Array.isArray(t.categories) ? t.categories[0]?.name : (t.categories as any).name) : 'Sem categoria';
+      return `[Data: ${t.date.split('T')[0]}] ${t.type === 'income' ? 'RECEITA' : 'DESPESA'} | Valor: R$ ${t.amount} | Descrição: ${t.description} | Categoria: ${catName}`;
+    });
+    
+    return `RELATÓRIO REAL DO BANCO DE DADOS (USE APENAS ESTES DADOS):\n${formattedData.join('\n')}`;
   }
 }

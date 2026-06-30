@@ -143,6 +143,9 @@ export class AIEngine {
       systemPrompt += `\n[ESPECIALIZAÇÃO: ${aiData.personality}]\n`;
     }
 
+    // Regra anti-alucinação crítica
+    systemPrompt += `\n[REGRA DE OURO - INTEGRIDADE DE DADOS]\nVOCÊ É PROIBIDO DE INVENTAR, SIMULAR OU ALUCINAR QUALQUER DADO FINANCEIRO OU COMPROMISSO. Se um usuário pedir um relatório ou saldo e a ferramenta retornar vazio, você DEVE dizer que não há dados reais cadastrados. NUNCA use dados de exemplo (ex: "Salário R$ 5.000"). Use ESTRITAMENTE os dados retornados pelas ferramentas.\n`;
+
     // Histórico já foi montado na etapa inicial (conversationHistory)
     
     // 6. Preparar Ferramentas
