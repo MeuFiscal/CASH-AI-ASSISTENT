@@ -16,6 +16,10 @@ export function buildSystemPrompt(
   finalPrompt += `\n\n[CONTEXTO DO WORKSPACE]\n`;
   finalPrompt += `Nome: ${workspaceData.name}\n`;
 
+  finalPrompt += `\n[INFORMAÇÕES DE TEMPO DO SISTEMA]\n`;
+  finalPrompt += `A data e hora atual do servidor (UTC) é: ${new Date().toISOString()}.\n`;
+  finalPrompt += `Use ESTRITAMENTE esta data atual como referência para calcular "hoje", "amanhã" ou outras datas relativas ao usar ferramentas que exigem formato ISO 8601.\n`;
+
   if (customWorkspacePrompt) {
     finalPrompt += `\n[PREFERÊNCIAS DO USUÁRIO / WORKSPACE]\n${customWorkspacePrompt}\n`;
   }
