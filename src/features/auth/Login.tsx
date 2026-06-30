@@ -20,20 +20,36 @@ export function Login() {
 
     try {
       if (mode === 'password') {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: identifier,
-          password: password,
-        });
+        const isEmail = identifier.includes('@');
+        
+        // Remove espaços e caracteres não numéricos se for telefone
+        let formattedPhone = identifier;
+        if (!isEmail) {
+          formattedPhone = identifier.replace(/\D/g, '');
+          if (!formattedPhone.startsWith('55')) {
+            formattedPhone = '55' + formattedPhone; // Assuming Brazil code, adjusts if needed
+          }
+          formattedPhone = '+' + formattedPhone;
+        }
+
+        const credentials = isEmail 
+          ? { email: identifier, password }
+          : { phone: formattedPhone, password };
+
+        const { error: signInError } = await supabase.auth.signInWithPassword(credentials);
 
         if (signInError) throw signInError;
         navigate('/dashboard');
       } else {
-        const { error: magicLinkError } = await supabase.auth.signInWithOtp({
-          email: identifier,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-          }
-        });
+        const isEmail = identifier.includes('@');
+        const options = {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        };
+
+        const { error: magicLinkError } = await (isEmail 
+          ? supabase.auth.signInWithOtp({ email: identifier, options })
+          : supabase.auth.signInWithOtp({ phone: '+' + identifier.replace(/\D/g, '').replace(/^0/, '') })
+        );
 
         if (magicLinkError) throw magicLinkError;
         alert('Magic Link enviado para ' + identifier);
