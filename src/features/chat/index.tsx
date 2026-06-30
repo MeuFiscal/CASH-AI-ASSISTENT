@@ -141,23 +141,6 @@ export function Chat() {
           <h1 className="text-3xl font-black text-white tracking-tight">
             Bom dia, {firstName} 👋
           </h1>
-          <div className="p-5 rounded-2xl bg-[#3B82F6]/5 border border-[#3B82F6]/10 backdrop-blur-md">
-            <p className="text-[#E2E8F0] font-medium tracking-wide mb-3">Hoje já registrei:</p>
-            <ul className="flex flex-col gap-2">
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
-                <span className="text-[#A8B3CF] text-[14px]">2 despesas</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
-                <span className="text-[#A8B3CF] text-[14px]">1 compromisso</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
-                <span className="text-[#A8B3CF] text-[14px]">3 documentos</span>
-              </li>
-            </ul>
-          </div>
         </div>
 
         {/* Histórico de Conversa */}
