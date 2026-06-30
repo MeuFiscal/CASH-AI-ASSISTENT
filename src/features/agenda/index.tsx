@@ -42,7 +42,7 @@ export function Agenda() {
 
       const { data: allEvents } = await supabase
         .from('calendar_events')
-        .select('start_time')
+        .select('*')
         .eq('workspace_id', ws.workspace_id)
         .gte('start_time', threeMonthsAgo.toISOString())
         .lte('start_time', threeMonthsAhead.toISOString());
@@ -55,42 +55,30 @@ export function Agenda() {
           datesSet.add(dateStr);
         });
         setActiveDates(datesSet);
+
+        // -- Eventos Dia Selecionado --
+        const evtsSelected = allEvents.filter(evt => {
+           const d = new Date(evt.start_time);
+           return d.getFullYear() === selectedDate.getFullYear() && 
+                  d.getMonth() === selectedDate.getMonth() &&
+                  d.getDate() === selectedDate.getDate();
+        });
+        evtsSelected.sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+        setEventsSelected(evtsSelected);
+
+        // -- Eventos Dia Seguinte --
+        const nextDate = new Date(selectedDate);
+        nextDate.setDate(nextDate.getDate() + 1);
+
+        const evtsNext = allEvents.filter(evt => {
+           const d = new Date(evt.start_time);
+           return d.getFullYear() === nextDate.getFullYear() && 
+                  d.getMonth() === nextDate.getMonth() &&
+                  d.getDate() === nextDate.getDate();
+        });
+        evtsNext.sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+        setEventsNext(evtsNext);
       }
-
-      // --- Buscar eventos do Dia Selecionado e Dia Seguinte ---
-      const startOfSelected = new Date(selectedDate);
-      startOfSelected.setHours(0, 0, 0, 0);
-      
-      const endOfSelected = new Date(startOfSelected);
-      endOfSelected.setHours(23, 59, 59, 999);
-
-      const startOfNext = new Date(startOfSelected);
-      startOfNext.setDate(startOfNext.getDate() + 1);
-      
-      const endOfNext = new Date(startOfNext);
-      endOfNext.setHours(23, 59, 59, 999);
-
-      // Eventos Dia Selecionado
-      const { data: evtsSelected } = await supabase
-        .from('calendar_events')
-        .select('*')
-        .eq('workspace_id', ws.workspace_id)
-        .gte('start_time', startOfSelected.toISOString())
-        .lte('start_time', endOfSelected.toISOString())
-        .order('start_time', { ascending: true });
-        
-      if (evtsSelected) setEventsSelected(evtsSelected);
-
-      // Eventos Dia Seguinte
-      const { data: evtsNext } = await supabase
-        .from('calendar_events')
-        .select('*')
-        .eq('workspace_id', ws.workspace_id)
-        .gte('start_time', startOfNext.toISOString())
-        .lte('start_time', endOfNext.toISOString())
-        .order('start_time', { ascending: true });
-        
-      if (evtsNext) setEventsNext(evtsNext);
 
       // --- Tarefas (Independente de data para simplificar) ---
       const { data: tsks } = await supabase
@@ -178,13 +166,15 @@ export function Agenda() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* Lado Esquerdo: Calendário */}
-          <div className="lg:col-span-1 flex flex-col gap-8">
+          <div className="lg:col-span-3 flex flex-col gap-6">
             <CalendarSelector 
               selectedDate={selectedDate} 
               onSelectDate={setSelectedDate} 
               activeDates={activeDates} 
             />
+          </div>
 
+          <div className="lg:col-span-1 flex flex-col gap-8">
             <PageSection title="Lista de Tarefas">
               <div className="flex flex-col gap-4">
                 {tasks.length === 0 ? (
