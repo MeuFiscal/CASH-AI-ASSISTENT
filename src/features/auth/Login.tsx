@@ -20,36 +20,42 @@ export function Login() {
 
     try {
       if (mode === 'password') {
+        // Se não tiver @, é um telefone. Vamos usar o truque de transformar em email 
+        // para não precisar de verificação por SMS no Supabase.
         const isEmail = identifier.includes('@');
+        let authIdentifier = identifier;
         
-        // Remove espaços e caracteres não numéricos se for telefone
-        let formattedPhone = identifier;
         if (!isEmail) {
-          formattedPhone = identifier.replace(/\D/g, '');
-          if (!formattedPhone.startsWith('55')) {
-            formattedPhone = '55' + formattedPhone; // Assuming Brazil code, adjusts if needed
-          }
-          formattedPhone = '+' + formattedPhone;
+          // Remove tudo que não for número
+          const justNumbers = identifier.replace(/\D/g, '');
+          // Adiciona um domínio falso para o Supabase aceitar como email
+          authIdentifier = `${justNumbers}@telefone.cashai.com`;
         }
 
-        const credentials = isEmail 
-          ? { email: identifier, password }
-          : { phone: formattedPhone, password };
-
-        const { error: signInError } = await supabase.auth.signInWithPassword(credentials);
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: authIdentifier,
+          password: password
+        });
 
         if (signInError) throw signInError;
         navigate('/dashboard');
       } else {
         const isEmail = identifier.includes('@');
+        let authIdentifier = identifier;
+
+        if (!isEmail) {
+          const justNumbers = identifier.replace(/\D/g, '');
+          authIdentifier = `${justNumbers}@telefone.cashai.com`;
+        }
+
         const options = {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         };
 
-        const { error: magicLinkError } = await (isEmail 
-          ? supabase.auth.signInWithOtp({ email: identifier, options })
-          : supabase.auth.signInWithOtp({ phone: '+' + identifier.replace(/\D/g, '').replace(/^0/, '') })
-        );
+        const { error: magicLinkError } = await supabase.auth.signInWithOtp({ 
+          email: authIdentifier, 
+          options 
+        });
 
         if (magicLinkError) throw magicLinkError;
         alert('Magic Link enviado para ' + identifier);
