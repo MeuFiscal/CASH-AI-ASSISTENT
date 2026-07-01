@@ -3,7 +3,7 @@ import { Users, Building2, Wallet, BrainCircuit, Activity, Server, MessageCircle
 
 export function KpiGrid({ metrics, loading }: { metrics: any, loading: boolean }) {
   const statCards = [
-    { title: 'Usuários Ativos', value: metrics?.users?.active || 0, trend: '+12%', icon: Users, color: 'text-[#3B82F6]' },
+    { title: 'Usuários Ativos', value: metrics?.users?.total || 0, trend: '+12%', icon: Users, color: 'text-[#3B82F6]' },
     { title: 'Workspaces', value: metrics?.workspaces?.total || 0, trend: '+5%', icon: Building2, color: 'text-[#10B981]' },
     { title: 'Assinantes Premium', value: metrics?.premium_subs || 0, trend: '+8%', icon: Activity, color: 'text-[#F59E0B]' },
     { title: 'Receita MRR', value: `R$ ${(metrics?.mrr || 0).toLocaleString('pt-BR')}`, trend: '+15%', icon: Wallet, color: 'text-[#8B5CF6]' },

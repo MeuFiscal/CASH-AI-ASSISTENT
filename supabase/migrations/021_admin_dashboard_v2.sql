@@ -9,7 +9,6 @@ ADD COLUMN IF NOT EXISTS country VARCHAR(255) DEFAULT 'Brasil';
 
 -- 2. Índices de Performance para Dashboard
 CREATE INDEX IF NOT EXISTS idx_workspaces_created_at ON public.workspaces(created_at);
-CREATE INDEX IF NOT EXISTS idx_users_created_at ON auth.users(created_at);
 CREATE INDEX IF NOT EXISTS idx_transactions_created_at ON public.transactions(created_at);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON public.audit_logs(created_at);
 

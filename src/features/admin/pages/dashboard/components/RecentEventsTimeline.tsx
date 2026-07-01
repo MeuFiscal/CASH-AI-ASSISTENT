@@ -16,7 +16,20 @@ export function RecentEventsTimeline({ events, loading }: { events: EventLog[], 
       case 'error': return { icon: AlertCircle, color: 'text-red-400', bg: 'bg-red-400/10' };
       case 'webhook': return { icon: Zap, color: 'text-purple-400', bg: 'bg-purple-400/10' };
       case 'workspace_created': return { icon: PlayCircle, color: 'text-orange-400', bg: 'bg-orange-400/10' };
+      case 'workspace_created': return { icon: PlayCircle, color: 'text-orange-400', bg: 'bg-orange-400/10' };
       default: return { icon: Clock, color: 'text-gray-400', bg: 'bg-gray-400/10' };
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString;
+      return new Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
+      }).format(date);
+    } catch {
+      return dateString;
     }
   };
 
@@ -42,11 +55,11 @@ export function RecentEventsTimeline({ events, loading }: { events: EventLog[], 
                   <Icon className={`w-4 h-4 ${config.color}`} />
                 </div>
                 <div className="w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] p-3 rounded-xl bg-[#0A0D14]/50 border border-white/5 hover:bg-[#181C28] transition-colors ml-4 md:ml-0 shadow-sm">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-white text-sm">{event.title}</span>
-                    <time className="text-[10px] text-[#A8B3CF] bg-white/5 px-2 py-0.5 rounded-full">{event.date}</time>
+                  <div className="flex items-center justify-between mb-1 gap-2">
+                    <span className="font-medium text-white text-sm line-clamp-1 truncate">{event.title}</span>
+                    <time className="text-[10px] text-[#A8B3CF] bg-white/5 px-2 py-0.5 rounded-full shrink-0">{formatDate(event.date)}</time>
                   </div>
-                  <div className="text-xs text-[#A8B3CF]">{event.description}</div>
+                  <div className="text-xs text-[#A8B3CF] line-clamp-2">{event.description}</div>
                 </div>
               </div>
             );
