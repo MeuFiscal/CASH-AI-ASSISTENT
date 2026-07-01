@@ -4,6 +4,8 @@ import { PageHeader } from '../../../../components/PageHeader';
 import { Shield, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { AdminLayout } from '../../components/AdminLayout';
+
 
 interface AdminAuditLog {
   id: string;
@@ -35,7 +37,8 @@ export function AdminAudit() {
   }, []);
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <AdminLayout>
+      <div className="p-8 max-w-7xl mx-auto space-y-8">
       <PageHeader
         icon={Shield}
         title="Auditoria"
@@ -108,5 +111,6 @@ export function AdminAudit() {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 }

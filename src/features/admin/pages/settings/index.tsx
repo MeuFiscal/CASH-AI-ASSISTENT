@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../../lib/supabase';
 import { PageHeader } from '../../../../components/PageHeader';
+import { AdminLayout } from '../../components/AdminLayout';
 import { Settings, Save, AlertTriangle, ShieldCheck, Mail, Clock } from 'lucide-react';
 
 interface PlatformSettings {
@@ -66,6 +67,7 @@ export function AdminSettings() {
   }
 
   return (
+    <AdminLayout>
     <div className="p-8 max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
       <PageHeader
         icon={Settings}
@@ -197,5 +199,6 @@ export function AdminSettings() {
         </button>
       </div>
     </div>
+    </AdminLayout>
   );
 }

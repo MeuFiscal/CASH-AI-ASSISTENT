@@ -4,6 +4,8 @@ import { PageHeader } from '../../../../components/PageHeader';
 import { CreditCard, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { AdminLayout } from '../../components/AdminLayout';
+
 
 interface AdminSubscription {
   id: string;
@@ -36,7 +38,8 @@ export function AdminSubscriptions() {
   }, []);
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <AdminLayout>
+      <div className="p-8 max-w-7xl mx-auto space-y-8">
       <PageHeader
         icon={CreditCard}
         title="Assinaturas"
@@ -121,5 +124,6 @@ export function AdminSubscriptions() {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 }

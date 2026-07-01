@@ -4,6 +4,8 @@ import { PageHeader } from '../../../../components/PageHeader';
 import { LineChart, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { AdminLayout } from '../../components/AdminLayout';
+
 
 interface AdminAnalytic {
   date: string;
@@ -32,7 +34,8 @@ export function AdminAnalytics() {
   }, []);
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <AdminLayout>
+      <div className="p-8 max-w-7xl mx-auto space-y-8">
       <PageHeader
         icon={LineChart}
         title="Analytics"
@@ -99,5 +102,6 @@ export function AdminAnalytics() {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 }

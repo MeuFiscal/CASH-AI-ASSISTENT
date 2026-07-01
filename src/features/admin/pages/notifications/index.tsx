@@ -4,6 +4,8 @@ import { PageHeader } from '../../../../components/PageHeader';
 import { Bell, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { AdminLayout } from '../../components/AdminLayout';
+
 
 interface AdminNotification {
   id: string;
@@ -34,7 +36,8 @@ export function AdminNotifications() {
   }, []);
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <AdminLayout>
+      <div className="p-8 max-w-7xl mx-auto space-y-8">
       <PageHeader
         icon={Bell}
         title="Notificações Globais"
@@ -117,5 +120,6 @@ export function AdminNotifications() {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 }
