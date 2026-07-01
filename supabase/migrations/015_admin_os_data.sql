@@ -8,7 +8,7 @@ BEGIN
     RETURN EXISTS (
         SELECT 1 FROM public.user_roles 
         WHERE user_id = auth.uid() 
-        AND role IN ('super_admin', 'admin')
+        AND role::text IN ('super_admin', 'admin')
     );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -83,30 +83,33 @@ BEGIN
         RAISE EXCEPTION 'Acesso negado';
     END IF;
 
-    SELECT COALESCE(jsonb_agg(
-        jsonb_build_object(
-            'id', u.id,
-            'name', COALESCE(u.raw_user_meta_data->>'name', 'Sem Nome'),
-            'email', u.email,
-            'phone', COALESCE(u.phone, u.raw_user_meta_data->>'phone', ''),
-            'role', COALESCE(ur.role, 'user'),
-            'status', COALESCE(u.raw_user_meta_data->>'status', 'ACTIVE'),
-            'last_login', u.last_sign_in_at,
-            'created_at', u.created_at,
-            'plan_name', COALESCE((
-                SELECT p.name 
-                FROM public.workspace_members wm
-                JOIN public.subscriptions s ON s.workspace_id = wm.workspace_id
-                JOIN public.plans p ON p.id = s.plan_id
-                WHERE wm.user_id = u.id
-                ORDER BY s.created_at DESC LIMIT 1
-            ), 'Nenhum')
-        )
-    ), '[]'::jsonb)
-    INTO v_result
-    FROM auth.users u
-    LEFT JOIN public.user_roles ur ON ur.user_id = u.id
-    ORDER BY u.created_at DESC;
+    SELECT COALESCE(
+        (SELECT jsonb_agg(
+            jsonb_build_object(
+                'id', sub.id,
+                'name', COALESCE(sub.raw_user_meta_data->>'name', 'Sem Nome'),
+                'email', sub.email,
+                'phone', COALESCE(sub.phone, sub.raw_user_meta_data->>'phone', ''),
+                'role', COALESCE(sub.role, 'user'),
+                'status', COALESCE(sub.raw_user_meta_data->>'status', 'ACTIVE'),
+                'last_login', sub.last_sign_in_at,
+                'created_at', sub.created_at,
+                'plan_name', COALESCE((
+                    SELECT p.name 
+                    FROM public.workspace_members wm
+                    JOIN public.subscriptions s ON s.workspace_id = wm.workspace_id
+                    JOIN public.plans p ON p.id = s.plan_id
+                    WHERE wm.user_id = sub.id
+                    ORDER BY s.created_at DESC LIMIT 1
+                ), 'Nenhum')
+            )
+        ) FROM (
+            SELECT u.id, u.raw_user_meta_data, u.email, u.phone, ur.role, u.last_sign_in_at, u.created_at
+            FROM auth.users u
+            LEFT JOIN public.user_roles ur ON ur.user_id = u.id
+            ORDER BY u.created_at DESC
+        ) sub), '[]'::jsonb
+    ) INTO v_result;
 
     RETURN v_result;
 END;
@@ -123,26 +126,29 @@ BEGIN
         RAISE EXCEPTION 'Acesso negado';
     END IF;
 
-    SELECT COALESCE(jsonb_agg(
-        jsonb_build_object(
-            'id', w.id,
-            'name', w.name,
-            'slug', w.slug,
-            'status', w.status,
-            'created_at', w.created_at,
-            'updated_at', w.updated_at,
-            'owner_email', u.email,
-            'owner_name', COALESCE(u.raw_user_meta_data->>'name', 'Desconhecido'),
-            'member_count', (SELECT COUNT(*) FROM public.workspace_members WHERE workspace_id = w.id),
-            'plan_name', COALESCE(p.name, 'Nenhum')
-        )
-    ), '[]'::jsonb)
-    INTO v_result
-    FROM public.workspaces w
-    JOIN auth.users u ON u.id = w.owner_user_id
-    LEFT JOIN public.subscriptions s ON s.workspace_id = w.id AND s.status IN ('ACTIVE', 'TRIALING')
-    LEFT JOIN public.plans p ON p.id = s.plan_id
-    ORDER BY w.created_at DESC;
+    SELECT COALESCE(
+        (SELECT jsonb_agg(
+            jsonb_build_object(
+                'id', sub.id,
+                'name', sub.name,
+                'slug', sub.slug,
+                'status', sub.status,
+                'created_at', sub.created_at,
+                'updated_at', sub.updated_at,
+                'owner_email', sub.email,
+                'owner_name', COALESCE(sub.raw_user_meta_data->>'name', 'Desconhecido'),
+                'member_count', (SELECT COUNT(*) FROM public.workspace_members WHERE workspace_id = sub.id),
+                'plan_name', COALESCE(sub.plan_name, 'Nenhum')
+            )
+        ) FROM (
+            SELECT w.id, w.name, w.slug, w.status, w.created_at, w.updated_at, u.email, u.raw_user_meta_data, p.name as plan_name
+            FROM public.workspaces w
+            JOIN auth.users u ON u.id = w.owner_user_id
+            LEFT JOIN public.subscriptions s ON s.workspace_id = w.id AND s.status IN ('ACTIVE', 'TRIALING')
+            LEFT JOIN public.plans p ON p.id = s.plan_id
+            ORDER BY w.created_at DESC
+        ) sub), '[]'::jsonb
+    ) INTO v_result;
 
     RETURN v_result;
 END;
@@ -159,25 +165,28 @@ BEGIN
         RAISE EXCEPTION 'Acesso negado';
     END IF;
 
-    SELECT COALESCE(jsonb_agg(
-        jsonb_build_object(
-            'id', wa.id,
-            'workspace_name', w.name,
-            'phone_number', wa.phone_number,
-            'status', wa.status,
-            'last_sync', wa.updated_at,
-            'last_message', (
-                SELECT created_at 
-                FROM public.whatsapp_messages 
-                WHERE whatsapp_account_id = wa.id 
-                ORDER BY created_at DESC LIMIT 1
+    SELECT COALESCE(
+        (SELECT jsonb_agg(
+            jsonb_build_object(
+                'id', sub.id,
+                'workspace_name', sub.name,
+                'phone_number', sub.phone_number,
+                'status', sub.status,
+                'last_sync', sub.updated_at,
+                'last_message', (
+                    SELECT created_at 
+                    FROM public.whatsapp_messages 
+                    WHERE whatsapp_account_id = sub.id 
+                    ORDER BY created_at DESC LIMIT 1
+                )
             )
-        )
-    ), '[]'::jsonb)
-    INTO v_result
-    FROM public.whatsapp_accounts wa
-    JOIN public.workspaces w ON w.id = wa.workspace_id
-    ORDER BY wa.updated_at DESC;
+        ) FROM (
+            SELECT wa.id, wa.phone_number, wa.status, wa.updated_at, w.name
+            FROM public.whatsapp_accounts wa
+            JOIN public.workspaces w ON w.id = wa.workspace_id
+            ORDER BY wa.updated_at DESC
+        ) sub), '[]'::jsonb
+    ) INTO v_result;
 
     RETURN v_result;
 END;
@@ -218,15 +227,20 @@ BEGIN
         'models_used', 'gpt-4o',
         'last_execution', v_last_execution,
         'history', (
-             SELECT COALESCE(jsonb_agg(
-                 jsonb_build_object(
-                     'date', DATE(created_at),
-                     'tokens', (metadata->'tokens'->>'total')::numeric
-                 )
-             ), '[]'::jsonb)
-             FROM public.messages
-             WHERE metadata ? 'tokens'
-             AND created_at >= NOW() - INTERVAL '7 days'
+             SELECT COALESCE(
+                 (SELECT jsonb_agg(
+                     jsonb_build_object(
+                         'date', DATE(sub.created_at),
+                         'tokens', (sub.metadata->'tokens'->>'total')::numeric
+                     )
+                 ) FROM (
+                     SELECT created_at, metadata
+                     FROM public.messages
+                     WHERE metadata ? 'tokens'
+                     AND created_at >= NOW() - INTERVAL '7 days'
+                     ORDER BY created_at ASC
+                 ) sub), '[]'::jsonb
+             )
         )
     );
 
@@ -254,6 +268,139 @@ BEGIN
         'edge_functions', 'operational',
         'last_errors', '[]'::jsonb
     );
+
+    RETURN v_result;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 7. admin_get_subscriptions()
+CREATE OR REPLACE FUNCTION admin_get_subscriptions()
+RETURNS JSONB AS $$
+DECLARE
+    v_result JSONB;
+BEGIN
+    IF NOT admin_check_access() THEN
+        RAISE EXCEPTION 'Acesso negado';
+    END IF;
+
+    SELECT COALESCE(
+        (SELECT jsonb_agg(
+            jsonb_build_object(
+                'id', sub.id,
+                'workspace_name', sub.name,
+                'plan_name', sub.plan_name,
+                'status', sub.status,
+                'current_period_end', sub.current_period_end,
+                'price', sub.price,
+                'created_at', sub.created_at
+            )
+        ) FROM (
+            SELECT s.id, w.name, p.name as plan_name, s.status, s.current_period_end, p.price, s.created_at
+            FROM public.subscriptions s
+            JOIN public.workspaces w ON w.id = s.workspace_id
+            JOIN public.plans p ON p.id = s.plan_id
+            ORDER BY s.created_at DESC
+        ) sub), '[]'::jsonb
+    ) INTO v_result;
+
+    RETURN v_result;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+
+-- 8. admin_get_analytics()
+CREATE OR REPLACE FUNCTION admin_get_analytics()
+RETURNS JSONB AS $$
+DECLARE
+    v_result JSONB;
+BEGIN
+    IF NOT admin_check_access() THEN
+        RAISE EXCEPTION 'Acesso negado';
+    END IF;
+
+    SELECT COALESCE(
+        (SELECT jsonb_agg(
+            jsonb_build_object(
+                'date', DATE(sub.created_at),
+                'conversations', COUNT(DISTINCT sub.id),
+                'messages', COUNT(DISTINCT sub.msg_id)
+            )
+        ) FROM (
+            SELECT c.id, c.created_at, m.id as msg_id
+            FROM public.conversations c
+            LEFT JOIN public.messages m ON m.conversation_id = c.id
+            WHERE c.created_at >= NOW() - INTERVAL '30 days'
+        ) sub
+        GROUP BY DATE(sub.created_at)
+        ORDER BY DATE(sub.created_at) DESC
+        ), '[]'::jsonb
+    ) INTO v_result;
+
+    RETURN v_result;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+
+-- 9. admin_get_notifications()
+CREATE OR REPLACE FUNCTION admin_get_notifications()
+RETURNS JSONB AS $$
+DECLARE
+    v_result JSONB;
+BEGIN
+    IF NOT admin_check_access() THEN
+        RAISE EXCEPTION 'Acesso negado';
+    END IF;
+
+    SELECT COALESCE(
+        (SELECT jsonb_agg(
+            jsonb_build_object(
+                'id', sub.id,
+                'title', sub.title,
+                'type', sub.type,
+                'status', sub.status,
+                'created_at', sub.created_at
+            )
+        ) FROM (
+            SELECT n.id, n.title, n.type, n.status, n.created_at
+            FROM public.notifications n
+            ORDER BY n.created_at DESC
+            LIMIT 100
+        ) sub), '[]'::jsonb
+    ) INTO v_result;
+
+    RETURN v_result;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+
+-- 10. admin_get_audit_logs()
+CREATE OR REPLACE FUNCTION admin_get_audit_logs()
+RETURNS JSONB AS $$
+DECLARE
+    v_result JSONB;
+BEGIN
+    IF NOT admin_check_access() THEN
+        RAISE EXCEPTION 'Acesso negado';
+    END IF;
+
+    SELECT COALESCE(
+        (SELECT jsonb_agg(
+            jsonb_build_object(
+                'id', sub.id,
+                'action', sub.action,
+                'entity_type', sub.entity_type,
+                'entity_id', sub.entity_id,
+                'user_email', sub.email,
+                'created_at', sub.created_at
+            )
+        ) FROM (
+            SELECT a.id, a.action, a.entity_type, a.entity_id, u.email, a.created_at
+            FROM public.audit_logs a
+            LEFT JOIN auth.users u ON u.id = a.actor_id
+            ORDER BY a.created_at DESC
+            LIMIT 100
+        ) sub), '[]'::jsonb
+    ) INTO v_result;
 
     RETURN v_result;
 END;
