@@ -35,6 +35,7 @@ export function AdminUsers() {
   const [filters] = useState<{ status?: string; role?: string }>({});
   const [sortBy, setSortBy] = useState('created_at');
   const [sortDir] = useState<'asc' | 'desc'>('desc');
+  const [fetchError, setFetchError] = useState<string | null>(null);
   
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [selectedUserForDrawer, setSelectedUserForDrawer] = useState<string | null>(null);
@@ -58,8 +59,14 @@ export function AdminUsers() {
     });
 
     if (error) {
-      console.error('Error fetching users:', error);
-    } else if (data) {
+      console.error('Error in admin_get_users:', error);
+      setFetchError(error.message);
+      setLoading(false);
+      return;
+    }
+
+    setFetchError(null);
+    if (data) {
       setUsers(data.data || []);
       setTotal(data.meta?.total || 0);
     }
@@ -143,7 +150,13 @@ export function AdminUsers() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 bg-transparent">
-                {loading ? (
+                {fetchError ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center text-red-400">
+                      Erro da API: {fetchError}
+                    </td>
+                  </tr>
+                ) : loading ? (
                   Array.from({length: 5}).map((_, i) => (
                     <tr key={i} className="animate-pulse">
                       <td className="px-6 py-6"><div className="w-4 h-4 bg-white/10 rounded"></div></td>
