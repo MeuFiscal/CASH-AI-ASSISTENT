@@ -35,7 +35,7 @@ export function OnboardingFlow() {
 
   const handleCompleteSetup = () => {
     // Navigate to Dashboard
-    navigate('/dashboard?onboarded=true');
+    navigate('/login-transition?onboarded=true');
   };
 
   // ─── Rendering Suggestions based on phase ───

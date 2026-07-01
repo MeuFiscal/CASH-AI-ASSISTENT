@@ -40,14 +40,9 @@ export function Login() {
         if (signInError) throw signInError;
 
         if (data.user) {
-          const { data: roleData } = await supabase.from('user_roles').select('role').eq('user_id', data.user.id).single();
-          if (roleData && (roleData.role === 'super_admin' || roleData.role === 'admin')) {
-            navigate('/admin');
-          } else {
-            navigate('/dashboard');
-          }
+          navigate('/login-transition');
         } else {
-          navigate('/dashboard');
+          navigate('/login-transition');
         }
       } else {
         const isEmail = identifier.includes('@');
