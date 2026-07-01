@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { bootstrapUser } from '../bootstrap/bootstrapUser';
+
 
 export interface RegisterUserData {
   email: string;
@@ -32,15 +32,7 @@ export async function registerUser(data: RegisterUserData) {
       throw new Error('Usuário não foi criado corretamente.');
     }
 
-    // Immediately bootstrap structure for this user
-    const bootstrapResult = await bootstrapUser(authData.user.id, data.email, data.name, data.phone);
-    
-    if (!bootstrapResult.success) {
-      console.error('Bootstrap failed after registration:', bootstrapResult.error);
-      // Not throwing because auth succeeded, but we should handle it
-    }
-
-    return { success: true, user: authData.user, workspaceId: bootstrapResult.workspaceId };
+    return { success: true, user: authData.user };
   } catch (err: any) {
     console.error('Error in registerUser:', err);
     if (err.message?.includes('already registered') || err.message?.includes('já cadastrado')) {

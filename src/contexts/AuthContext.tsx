@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { User, UserStatus } from '@/types/models';
 import type { Session } from '@supabase/supabase-js';
-import { bootstrapUser } from '@/services/bootstrap/bootstrapUser';
+
 import { PremiumLoader } from '@/features/auth/components/PremiumLoader';
 
 export type GlobalRole = 'super_admin' | 'admin' | 'support' | 'user';
@@ -41,9 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const handleSession = async (session: Session | null) => {
     if (session?.user) {
       try {
-        // Bootstrap the user infrastructure before considering them fully logged in
-        await bootstrapUser(session.user.id, session.user.email, session.user.user_metadata?.name);
-        
+
         const mappedUser: User = {
           id: session.user.id,
           email: session.user.email || '',
