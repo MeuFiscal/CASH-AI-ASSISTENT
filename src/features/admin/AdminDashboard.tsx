@@ -12,6 +12,7 @@ import { AiUsageCard } from './pages/dashboard/components/AiUsageCard';
 import { WhatsAppStats } from './pages/dashboard/components/WhatsAppStats';
 import { FinancialPanel } from './pages/dashboard/components/FinancialPanel';
 import { UsersMap } from './pages/dashboard/components/UsersMap';
+import { IntelligenceCenter } from './pages/dashboard/components/intelligence/IntelligenceCenter';
 import { useSmartPolling } from '@/hooks/useSmartPolling';
 
 export function AdminDashboard() {
@@ -86,6 +87,11 @@ export function AdminDashboard() {
               <UsersMap data={mapData} loading={loading} />
             </div>
             <TopWorkspacesTable workspaces={topWorkspaces} loading={loading} />
+            
+            {/* Centro de Inteligência agora é o destaque final ocupando 2 colunas */}
+            <div className="mt-2">
+              <IntelligenceCenter />
+            </div>
           </div>
           <div className="flex flex-col gap-4">
             <SystemHealthPanel loading={loading} />
