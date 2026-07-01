@@ -321,19 +321,20 @@ BEGIN
     SELECT COALESCE(
         (SELECT jsonb_agg(
             jsonb_build_object(
-                'date', DATE(sub.created_at),
-                'conversations', COUNT(DISTINCT sub.id),
-                'messages', COUNT(DISTINCT sub.msg_id)
+                'date', grouped.date,
+                'conversations', grouped.conversations,
+                'messages', grouped.messages
             )
         ) FROM (
-            SELECT c.id, c.created_at, m.id as msg_id
+            SELECT DATE(c.created_at) as date,
+                   COUNT(DISTINCT c.id) as conversations,
+                   COUNT(DISTINCT m.id) as messages
             FROM public.conversations c
             LEFT JOIN public.messages m ON m.conversation_id = c.id
             WHERE c.created_at >= NOW() - INTERVAL '30 days'
-        ) sub
-        GROUP BY DATE(sub.created_at)
-        ORDER BY DATE(sub.created_at) DESC
-        ), '[]'::jsonb
+            GROUP BY DATE(c.created_at)
+            ORDER BY DATE(c.created_at) DESC
+        ) grouped), '[]'::jsonb
     ) INTO v_result;
 
     RETURN v_result;
@@ -357,11 +358,11 @@ BEGIN
                 'id', sub.id,
                 'title', sub.title,
                 'type', sub.type,
-                'status', sub.status,
+                'status', CASE WHEN sub.read_at IS NOT NULL THEN 'read' ELSE 'unread' END,
                 'created_at', sub.created_at
             )
         ) FROM (
-            SELECT n.id, n.title, n.type, n.status, n.created_at
+            SELECT n.id, n.title, n.type, n.read_at, n.created_at
             FROM public.notifications n
             ORDER BY n.created_at DESC
             LIMIT 100
@@ -388,15 +389,15 @@ BEGIN
             jsonb_build_object(
                 'id', sub.id,
                 'action', sub.action,
-                'entity_type', sub.entity_type,
-                'entity_id', sub.entity_id,
+                'entity_type', sub.resource_type,
+                'entity_id', sub.resource_id,
                 'user_email', sub.email,
                 'created_at', sub.created_at
             )
         ) FROM (
-            SELECT a.id, a.action, a.entity_type, a.entity_id, u.email, a.created_at
+            SELECT a.id, a.action, a.resource_type, a.resource_id, u.email, a.created_at
             FROM public.audit_logs a
-            LEFT JOIN auth.users u ON u.id = a.actor_id
+            LEFT JOIN auth.users u ON u.id = a.user_id
             ORDER BY a.created_at DESC
             LIMIT 100
         ) sub), '[]'::jsonb
