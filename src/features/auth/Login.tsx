@@ -32,13 +32,23 @@ export function Login() {
           authIdentifier = `${justNumbers}@telefone.cashai.com`;
         }
 
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email: authIdentifier,
           password: password
         });
 
         if (signInError) throw signInError;
-        navigate('/dashboard');
+
+        if (data.user) {
+          const { data: roleData } = await supabase.from('user_roles').select('role').eq('user_id', data.user.id).single();
+          if (roleData && (roleData.role === 'super_admin' || roleData.role === 'admin')) {
+            navigate('/admin');
+          } else {
+            navigate('/dashboard');
+          }
+        } else {
+          navigate('/dashboard');
+        }
       } else {
         const isEmail = identifier.includes('@');
         let authIdentifier = identifier;

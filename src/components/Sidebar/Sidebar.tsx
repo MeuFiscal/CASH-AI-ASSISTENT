@@ -16,7 +16,8 @@ import {
   Settings, 
   LogOut,
   Search,
-  Menu
+  Menu,
+  Shield
 } from 'lucide-react';
 import { cn } from '@/lib';
 import { useAuth } from '@/contexts/AuthContext';
@@ -57,7 +58,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
 export function Sidebar({ expanded, setExpanded }: SidebarProps) {
-  const { user, logout } = useAuth();
+  const { user, globalRole, logout } = useAuth();
   const navigate = useNavigate();
   const [agendaCount, setAgendaCount] = useState(0);
   const [notificationCount, setNotificationCount] = useState(0);
@@ -249,6 +250,18 @@ export function Sidebar({ expanded, setExpanded }: SidebarProps) {
               Sair
             </span>
           </button>
+
+          {(globalRole === 'super_admin' || globalRole === 'admin') && (
+            <button
+              onClick={() => navigate('/admin')}
+              className="flex items-center gap-3 px-4 py-3.5 mt-2 rounded-xl border border-[#F59E0B]/20 bg-[#F59E0B]/5 hover:bg-[#F59E0B]/10 text-[#F59E0B] transition-all duration-200 group relative shadow-[0_0_15px_rgba(245,158,11,0.1)]"
+            >
+              <Shield className="w-5 h-5 shrink-0" />
+              <span className="text-[15px] font-medium whitespace-nowrap">
+                Centro de Operações
+              </span>
+            </button>
+          )}
         </div>
 
       </aside>

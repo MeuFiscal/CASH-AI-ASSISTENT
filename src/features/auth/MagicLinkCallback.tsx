@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 import { PremiumBackground } from '@/features/landing/components/PremiumBackground';
 
 export function MagicLinkCallback() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, globalRole } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [error, setError] = useState(false);
@@ -14,15 +14,18 @@ export function MagicLinkCallback() {
     // Se o AuthContext terminar de carregar e o usuário estiver autenticado:
     if (!isLoading) {
       if (isAuthenticated) {
-        // Obter o parâmetro 'redirect' da URL (ou fallback para '/dashboard')
-        const redirectUrl = searchParams.get('redirect') || '/dashboard';
-        navigate(redirectUrl, { replace: true });
+        if (globalRole === 'super_admin' || globalRole === 'admin') {
+          navigate('/admin', { replace: true });
+        } else {
+          const redirectUrl = searchParams.get('redirect') || '/dashboard';
+          navigate(redirectUrl, { replace: true });
+        }
       } else {
         // Se carregou mas não autenticou, provavelmente o token expirou ou é inválido
         setError(true);
       }
     }
-  }, [isLoading, isAuthenticated, navigate, searchParams]);
+  }, [isLoading, isAuthenticated, globalRole, navigate, searchParams]);
 
   if (error) {
     return (

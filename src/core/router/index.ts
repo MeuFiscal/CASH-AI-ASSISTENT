@@ -218,10 +218,83 @@ export const router = createBrowserRouter([
     }
   },
   {
-    path: ROUTES.ADMIN,
+    id: 'protected-admin',
+    path: '/admin',
     lazy: async () => {
-      const { AdminPage } = await import('@/features/admin');
-      return { Component: AdminPage };
+      const { AdminRoute, ErrorBoundary } = await import('@/components/AdminRoute');
+      return { Component: AdminRoute, ErrorBoundary };
     },
+    children: [
+      {
+        index: true,
+        lazy: async () => {
+          const { AdminDashboard } = await import('@/features/admin/AdminDashboard');
+          return { Component: AdminDashboard };
+        }
+      },
+      {
+        path: 'users',
+        lazy: async () => {
+          const { AdminUsers } = await import('@/features/admin/pages/users');
+          return { Component: AdminUsers };
+        }
+      },
+      {
+        path: 'workspaces',
+        lazy: async () => {
+          const { AdminWorkspaces } = await import('@/features/admin/pages/workspaces');
+          return { Component: AdminWorkspaces };
+        }
+      },
+      {
+        path: 'whatsapp',
+        lazy: async () => {
+          const { AdminWhatsApp } = await import('@/features/admin/pages/whatsapp');
+          return { Component: AdminWhatsApp };
+        }
+      },
+      {
+        path: 'openai',
+        lazy: async () => {
+          const { AdminOpenAI } = await import('@/features/admin/pages/openai');
+          return { Component: AdminOpenAI };
+        }
+      },
+      {
+        path: 'subscriptions',
+        lazy: async () => {
+          const { AdminSubscriptions } = await import('@/features/admin/pages/subscriptions');
+          return { Component: AdminSubscriptions };
+        }
+      },
+      {
+        path: 'analytics',
+        lazy: async () => {
+          const { AdminAnalytics } = await import('@/features/admin/pages/analytics');
+          return { Component: AdminAnalytics };
+        }
+      },
+      {
+        path: 'notifications',
+        lazy: async () => {
+          const { AdminNotifications } = await import('@/features/admin/pages/notifications');
+          return { Component: AdminNotifications };
+        }
+      },
+      {
+        path: 'audit',
+        lazy: async () => {
+          const { AdminAudit } = await import('@/features/admin/pages/audit');
+          return { Component: AdminAudit };
+        }
+      },
+      {
+        path: 'settings',
+        lazy: async () => {
+          const { AdminSettings } = await import('@/features/admin/pages/settings');
+          return { Component: AdminSettings };
+        }
+      }
+    ]
   },
 ]);

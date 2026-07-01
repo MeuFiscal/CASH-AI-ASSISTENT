@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, Loader2, Brain } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 import { PremiumBackground } from '@/features/landing/components/PremiumBackground';
 
@@ -14,6 +15,7 @@ const MESSAGES = [
 
 export function TransitionScreen() {
   const navigate = useNavigate();
+  const { globalRole } = useAuth();
   const [messageIndex, setMessageIndex] = useState(0);
 
   useEffect(() => {
@@ -28,14 +30,18 @@ export function TransitionScreen() {
 
     // Após 2.5s (um pouco mais que 1 segundo, para dar tempo de ler as 5 mensagens)
     const timeout = setTimeout(() => {
-      navigate('/dashboard'); // Redireciona
+      if (globalRole === 'super_admin' || globalRole === 'admin') {
+        navigate('/admin'); // Redireciona para o Centro de Operações
+      } else {
+        navigate('/dashboard'); // Redireciona para o Dashboard do Usuário
+      }
     }, 2500);
 
     return () => {
       clearInterval(interval);
       clearTimeout(timeout);
     };
-  }, [navigate]);
+  }, [navigate, globalRole]);
 
   return (
     <main className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden bg-[#0A0D14]">
