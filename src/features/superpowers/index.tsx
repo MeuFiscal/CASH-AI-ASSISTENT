@@ -106,7 +106,7 @@ export function Superpowers() {
           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-[#0B1221]/80 backdrop-blur-md" onClick={() => setIsPremiumModalOpen(false)} />
             
-            <div className="relative w-full max-w-md bg-[#181C28]/90 border border-[#F59E0B]/30 rounded-3xl p-8 shadow-[0_0_50px_rgba(245,158,11,0.15)] animate-in zoom-in-95 duration-300">
+            <div className="relative w-[90vw] max-w-md min-w-[320px] sm:min-w-[400px] bg-[#181C28]/90 border border-[#F59E0B]/30 rounded-3xl p-8 shadow-[0_0_50px_rgba(245,158,11,0.15)] animate-in zoom-in-95 duration-300">
               <button 
                 onClick={() => setIsPremiumModalOpen(false)}
                 className="absolute top-6 right-6 text-[#A8B3CF] hover:text-white transition-colors"
