@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { Zap, Calendar, Database, Mail, Lock, Crown, X } from 'lucide-react';
 import { PageContainer } from '@/components/PageContainer';
@@ -101,8 +102,8 @@ export function Superpowers() {
         </PageSection>
 
         {/* Premium Glassmorphism Modal */}
-        {isPremiumModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {isPremiumModalOpen && createPortal(
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-[#0B1221]/80 backdrop-blur-md" onClick={() => setIsPremiumModalOpen(false)} />
             
             <div className="relative w-full max-w-md bg-[#181C28]/90 border border-[#F59E0B]/30 rounded-3xl p-8 shadow-[0_0_50px_rgba(245,158,11,0.15)] animate-in zoom-in-95 duration-300">
@@ -126,7 +127,10 @@ export function Superpowers() {
 
               <div className="flex flex-col gap-3">
                 <button 
-                  onClick={() => navigate('/premium')}
+                  onClick={() => {
+                    setIsPremiumModalOpen(false);
+                    navigate('/premium');
+                  }}
                   className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-[#F59E0B] to-[#D97706] text-white font-bold text-[15px] hover:shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all"
                 >
                   <Crown className="w-5 h-5" />
@@ -141,7 +145,8 @@ export function Superpowers() {
                 </button>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
       </PageContainer>
