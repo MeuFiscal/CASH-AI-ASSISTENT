@@ -31,7 +31,7 @@ export function UserDrawer({ userId, onClose }: UserDrawerProps) {
   return createPortal(
     <>
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998] transition-opacity" onClick={onClose} />
-      <div className="fixed top-0 right-0 h-screen w-full max-w-lg bg-[#11131A] border-l border-white/5 z-[9999] shadow-2xl flex flex-col">
+      <div className="fixed top-0 right-0 h-screen w-[90vw] max-w-[500px] bg-[#11131A] border-l border-white/5 z-[9999] shadow-2xl flex flex-col">
         
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/5">

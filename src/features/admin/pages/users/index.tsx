@@ -7,7 +7,7 @@ import {
   ChevronRight, Building2, Eye, Ban, CheckCircle, Upload, Key, LogIn
 } from 'lucide-react';
 import { UserDrawer } from './components/UserDrawer';
-import { RoleModal, PlanModal, BlockModal, SoftDeleteModal } from './components/ActionModals';
+import { RoleModal, PlanModal, BlockModal, SoftDeleteModal, ResetPasswordModal } from './components/ActionModals';
 
 interface AdminUser {
   id: string;
@@ -43,7 +43,7 @@ export function AdminUsers() {
   // Modals state
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [modalState, setModalState] = useState<{
-    type: 'role' | 'plan' | 'block' | 'delete' | null;
+    type: 'role' | 'plan' | 'block' | 'delete' | 'reset_password' | null;
     user: AdminUser | null;
   }>({ type: null, user: null });
 
@@ -245,7 +245,7 @@ export function AdminUsers() {
                                 <button onClick={() => { setModalState({ type: 'role', user }); setActiveMenu(null); }} className="flex items-center gap-3 w-full px-3 py-2 text-sm text-white hover:bg-white/5 rounded-lg transition-colors text-left">
                                   <Shield className="w-4 h-4 text-blue-400" /> Alterar Papel
                                 </button>
-                                <button className="flex items-center gap-3 w-full px-3 py-2 text-sm text-white hover:bg-white/5 rounded-lg transition-colors text-left">
+                                <button onClick={() => { setModalState({ type: 'reset_password', user }); setActiveMenu(null); }} className="flex items-center gap-3 w-full px-3 py-2 text-sm text-white hover:bg-white/5 rounded-lg transition-colors text-left">
                                   <Key className="w-4 h-4 text-yellow-400" /> Resetar Senha
                                 </button>
                                 <div className="h-px bg-white/5 my-1 mx-2" />
@@ -339,6 +339,14 @@ export function AdminUsers() {
             onClose={() => setModalState({ type: null, user: null })} 
             userId={modalState.user.id} 
             userName={modalState.user.name} 
+            onSuccess={loadUsers}
+          />
+          <ResetPasswordModal 
+            isOpen={modalState.type === 'reset_password'} 
+            onClose={() => setModalState({ type: null, user: null })} 
+            userId={modalState.user.id} 
+            userName={modalState.user.name} 
+            userEmail={modalState.user.email}
             onSuccess={loadUsers}
           />
         </>

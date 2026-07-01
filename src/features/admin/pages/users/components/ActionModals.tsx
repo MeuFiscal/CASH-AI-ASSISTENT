@@ -31,7 +31,7 @@ export function RoleModal({ isOpen, onClose, userId, userName, onSuccess }: Base
 
   return createPortal(
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center">
-      <div className="bg-[#181C28] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+      <div className="bg-[#181C28] border border-white/10 rounded-2xl w-[90vw] max-w-[450px] shadow-2xl overflow-hidden">
         <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
           <div className="flex items-center gap-3">
             <Shield className="w-5 h-5 text-blue-400" />
@@ -99,7 +99,7 @@ export function PlanModal({ isOpen, onClose, userId, userName, onSuccess }: Base
 
   return createPortal(
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center">
-      <div className="bg-[#181C28] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+      <div className="bg-[#181C28] border border-white/10 rounded-2xl w-[90vw] max-w-[450px] shadow-2xl overflow-hidden">
         <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
           <div className="flex items-center gap-3">
             <CreditCard className="w-5 h-5 text-purple-400" />
@@ -158,7 +158,7 @@ export function BlockModal({ isOpen, onClose, userId, userName, onSuccess, isBlo
 
   return createPortal(
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center">
-      <div className="bg-[#181C28] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+      <div className="bg-[#181C28] border border-white/10 rounded-2xl w-[90vw] max-w-[450px] shadow-2xl overflow-hidden">
         <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
           <div className="flex items-center gap-3">
             {isBlocked ? <CheckCircle className="w-5 h-5 text-green-400" /> : <Ban className="w-5 h-5 text-red-400" />}
@@ -213,7 +213,7 @@ export function SoftDeleteModal({ isOpen, onClose, userId, userName, onSuccess }
 
   return createPortal(
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center">
-      <div className="bg-[#181C28] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+      <div className="bg-[#181C28] border border-white/10 rounded-2xl w-[90vw] max-w-[450px] shadow-2xl overflow-hidden">
         <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
           <div className="flex items-center gap-3">
             <Trash2 className="w-5 h-5 text-red-400" />
@@ -233,6 +233,59 @@ export function SoftDeleteModal({ isOpen, onClose, userId, userName, onSuccess }
           <button onClick={onClose} className="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-sm font-medium transition-colors">Cancelar</button>
           <button onClick={handleSave} disabled={loading} className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white rounded-xl text-sm font-medium transition-colors">
             {loading ? 'Processando...' : 'Excluir Conta'}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+export function ResetPasswordModal({ isOpen, onClose, userName, userEmail, onSuccess }: BaseModalProps & { userEmail: string }) {
+  const [loading, setLoading] = useState(false);
+
+  if (!isOpen) return null;
+
+  const handleSave = async () => {
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
+      redirectTo: window.location.origin + '/reset-password',
+    });
+    setLoading(false);
+    if (!error) {
+      alert(`Email de recuperação enviado para ${userName}!`);
+      onSuccess();
+      onClose();
+    } else {
+      alert('Erro ao enviar email de recuperação: ' + error.message);
+    }
+  };
+
+  return createPortal(
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center">
+      <div className="bg-[#181C28] border border-white/10 rounded-2xl w-[90vw] max-w-[450px] shadow-2xl overflow-hidden">
+        <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+          <div className="flex items-center gap-3">
+            <Shield className="w-5 h-5 text-yellow-400" />
+            <h3 className="text-lg font-semibold text-white">Resetar Senha</h3>
+          </div>
+          <button onClick={onClose} className="text-[#A8B3CF] hover:text-white transition-colors"><X className="w-5 h-5" /></button>
+        </div>
+        <div className="p-6 space-y-4">
+          <p className="text-sm text-[#A8B3CF]">
+            Deseja enviar um link de redefinição de senha para <strong className="text-white">{userName}</strong>?
+          </p>
+          <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl flex gap-3">
+            <AlertTriangle className="w-5 h-5 text-yellow-500 shrink-0" />
+            <p className="text-sm text-yellow-200">
+              Isso enviará um email contendo um link temporário para que o usuário redefina sua senha.
+            </p>
+          </div>
+        </div>
+        <div className="p-6 border-t border-white/5 flex gap-3 bg-black/20">
+          <button onClick={onClose} className="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-sm font-medium transition-colors">Cancelar</button>
+          <button onClick={handleSave} disabled={loading} className="flex-1 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 text-white rounded-xl text-sm font-medium transition-colors">
+            {loading ? 'Processando...' : 'Enviar Email'}
           </button>
         </div>
       </div>
