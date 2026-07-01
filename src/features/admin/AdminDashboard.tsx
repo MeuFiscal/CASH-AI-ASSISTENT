@@ -26,40 +26,29 @@ export function AdminDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const { data, error } = await supabase.rpc('admin_get_kpis_v2');
-      if (data && !error) setMetrics(data);
-      
-      // Simulate chart data for now
-      setChartData([
-        { date: '10/06', usuarios: 400, receita: 2400, workspaces: 24 },
-        { date: '15/06', usuarios: 550, receita: 3200, workspaces: 35 },
-        { date: '20/06', usuarios: 700, receita: 4500, workspaces: 50 },
-        { date: '25/06', usuarios: 950, receita: 6800, workspaces: 72 },
-        { date: '30/06', usuarios: 1200, receita: 9500, workspaces: 95 },
-      ]);
-      
-      setAlerts([
-        { id: '1', type: 'Sem pagamento', priority: 'Crítica', message: 'Workspace ACME sem assinatura ativa detectado.', date: new Date().toISOString() },
-        { id: '2', type: 'Taxa de Erro WhatsApp', priority: 'Alta', message: 'Muitas mensagens falhando na fila 3.', date: new Date(Date.now() - 3600000).toISOString() },
-      ]);
-
-      setEvents([
-        { id: '1', type: 'user_joined', title: 'Novo Usuário', description: 'João Silva criou uma conta.', date: '10 min atrás' },
-        { id: '2', type: 'payment', title: 'Assinatura', description: 'Plano Pro assinado por TechCorp.', date: '1h atrás' },
-        { id: '3', type: 'error', title: 'Erro de Webhook', description: 'Falha ao entregar evento para URL x.', date: '3h atrás' },
+      // Real data fetching via RPCs
+      const [
+        { data: kpis },
+        { data: chart },
+        { data: alertsData },
+        { data: eventsData },
+        { data: workspacesData },
+        { data: mapDataRes }
+      ] = await Promise.all([
+        supabase.rpc('admin_get_kpis_v2'),
+        supabase.rpc('admin_get_growth_chart', { p_period: '30d' }),
+        supabase.rpc('admin_get_smart_alerts'),
+        supabase.rpc('admin_get_recent_events', { p_limit: 15 }),
+        supabase.rpc('admin_get_top_workspaces'),
+        supabase.rpc('admin_get_users_map')
       ]);
 
-      setTopWorkspaces([
-        { id: '1', empresa: 'Acme Corp', plano: 'Enterprise', usuarios: 45, mensagens: 12000, tokens: 450000, receita: 4990.00, ultimo_acesso: '', status: 'Ativo' },
-        { id: '2', empresa: 'Tech Solutions', plano: 'Pro', usuarios: 12, mensagens: 4500, tokens: 120000, receita: 990.00, ultimo_acesso: '', status: 'Ativo' },
-      ]);
-
-      setMapData([
-        { uf: 'SP', workspaces: 45, receita: 12500, usuarios: 230 },
-        { uf: 'RJ', workspaces: 20, receita: 4500, usuarios: 85 },
-        { uf: 'MG', workspaces: 15, receita: 3200, usuarios: 60 },
-        { uf: 'SC', workspaces: 8, receita: 1800, usuarios: 35 },
-      ]);
+      if (kpis) setMetrics(kpis);
+      if (chart) setChartData(chart);
+      if (alertsData) setAlerts(alertsData);
+      if (eventsData) setEvents(eventsData);
+      if (workspacesData) setTopWorkspaces(workspacesData);
+      if (mapDataRes) setMapData(mapDataRes);
     } catch (err) {
       console.error(err);
     } finally {
