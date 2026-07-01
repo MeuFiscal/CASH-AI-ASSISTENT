@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../../../core/supabase/client';
-import { PageHeader } from '../../../../core/components/PageHeader';
+import { supabase } from '../../../../lib/supabase';
+import { PageHeader } from '../../../../components/PageHeader';
 import { Bell, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -36,8 +36,9 @@ export function AdminNotifications() {
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
       <PageHeader
+        icon={Bell}
         title="Notificações Globais"
-        description="Histórico das últimas 100 notificações disparadas pelo sistema."
+        subtitle="Histórico das últimas 100 notificações disparadas pelo sistema."
       />
 
       <div className="bg-[#0B0F19] border border-white/10 rounded-2xl overflow-hidden shadow-2xl relative group">

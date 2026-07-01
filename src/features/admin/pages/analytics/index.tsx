@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../../../core/supabase/client';
-import { PageHeader } from '../../../../core/components/PageHeader';
+import { supabase } from '../../../../lib/supabase';
+import { PageHeader } from '../../../../components/PageHeader';
 import { LineChart, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -34,8 +34,9 @@ export function AdminAnalytics() {
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
       <PageHeader
+        icon={LineChart}
         title="Analytics"
-        description="Métricas diárias de conversas e mensagens (últimos 30 dias)."
+        subtitle="Métricas diárias de conversas e mensagens (últimos 30 dias)."
       />
 
       <div className="bg-[#0B0F19] border border-white/10 rounded-2xl overflow-hidden shadow-2xl relative group">
