@@ -180,7 +180,19 @@ export class ToolExecutor {
     let query = this.supabase.from('transactions').select('amount, type, description, date, categories(name)').eq('workspace_id', workspaceId);
     
     if (start_date) query = query.gte('date', start_date);
-    if (end_date) query = query.lte('date', end_date);
+    if (end_date) {
+      // Se a IA enviar apenas "YYYY-MM-DD" ou uma data terminada em 23:59:59Z, 
+      // adicionamos uma margem de segurança de +3 horas para cobrir o final do dia no fuso horário do Brasil (UTC-3).
+      let adjustedEndDate = new Date(end_date);
+      if (!isNaN(adjustedEndDate.getTime())) {
+        // Se a data já contiver Z e for exatamente o fim do dia em UTC, estende.
+        // O mais seguro é simplesmente somar 4 horas para garantir que cobre o dia até o final em GMT-3/-4
+        adjustedEndDate.setHours(adjustedEndDate.getHours() + 4);
+        query = query.lte('date', adjustedEndDate.toISOString());
+      } else {
+        query = query.lte('date', end_date);
+      }
+    }
     
     const { data, error } = await query;
     if (error) {

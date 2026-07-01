@@ -18,7 +18,7 @@ export function buildSystemPrompt(
 
   finalPrompt += `\n[INFORMAÇÕES DE TEMPO DO SISTEMA]\n`;
   finalPrompt += `A data e hora atual do servidor (UTC) é: ${new Date().toISOString()}.\n`;
-  finalPrompt += `IMPORTANTE: O fuso horário do usuário é America/Sao_Paulo (UTC-03:00). Ao agendar eventos ou usar ferramentas, sempre crie os horários considerando este fuso horário enviando o offset correto no formato ISO 8601 (Ex: 2026-07-01T10:00:00-03:00). NUNCA envie horários em UTC puro (com Z no final) a menos que você tenha feito a conversão matemática subtraindo 3 horas.\n`;
+  finalPrompt += `Lembre-se de utilizar essa data/hora como base (considerando o fuso horário America/Sao_Paulo, que é UTC-3) para calcular valores relativos como 'hoje', 'amanhã', 'este mês', etc. Ao agendar eventos ou usar ferramentas, sempre crie os horários considerando este fuso horário enviando o offset correto no formato ISO 8601 (Ex: 2026-07-01T10:00:00-03:00). NUNCA envie horários em UTC puro (com Z no final) a menos que você tenha feito a conversão matemática subtraindo 3 horas. Para o início e fim de meses, considere que o dia no Brasil termina ou começa com o offset de -03:00.\n`;
 
   if (customWorkspacePrompt) {
     finalPrompt += `\n[PREFERÊNCIAS DO USUÁRIO / WORKSPACE]\n${customWorkspacePrompt}\n`;
