@@ -1,5 +1,5 @@
-import { AdminLayout } from '../components/AdminLayout';
-import { Users, Building2, Wallet, MessageSquare, BrainCircuit, Activity } from 'lucide-react';
+import { AdminLayout } from './components/AdminLayout';
+import { Users, Building2, Wallet, BrainCircuit } from 'lucide-react';
 
 export function AdminDashboard() {
   return (
