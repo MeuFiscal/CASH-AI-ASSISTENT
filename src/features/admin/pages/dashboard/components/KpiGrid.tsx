@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Users, Building2, Wallet, BrainCircuit, Activity, Server, MessageCircle, BarChart } from 'lucide-react';
 
 export function KpiGrid({ metrics, loading }: { metrics: any, loading: boolean }) {
