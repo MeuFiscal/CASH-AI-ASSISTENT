@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -27,10 +28,10 @@ export function UserDrawer({ userId, onClose }: UserDrawerProps) {
     loadData();
   }, [userId]);
 
-  return (
+  return createPortal(
     <>
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity" onClick={onClose} />
-      <div className="fixed top-0 right-0 h-screen w-full max-w-lg bg-[#11131A] border-l border-white/5 z-50 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998] transition-opacity" onClick={onClose} />
+      <div className="fixed top-0 right-0 h-screen w-full max-w-lg bg-[#11131A] border-l border-white/5 z-[9999] shadow-2xl flex flex-col">
         
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/5">
@@ -167,6 +168,7 @@ export function UserDrawer({ userId, onClose }: UserDrawerProps) {
           </>
         )}
       </div>
-    </>
+    </>,
+    document.body
   );
 }

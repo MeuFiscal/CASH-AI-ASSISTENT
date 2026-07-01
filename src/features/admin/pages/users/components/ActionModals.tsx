@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Shield, CreditCard, Ban, Trash2, AlertTriangle, CheckCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -28,8 +29,8 @@ export function RoleModal({ isOpen, onClose, userId, userName, onSuccess }: Base
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center">
       <div className="bg-[#181C28] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
         <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
           <div className="flex items-center gap-3">
@@ -66,7 +67,8 @@ export function RoleModal({ isOpen, onClose, userId, userName, onSuccess }: Base
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -95,8 +97,8 @@ export function PlanModal({ isOpen, onClose, userId, userName, onSuccess }: Base
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center">
       <div className="bg-[#181C28] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
         <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
           <div className="flex items-center gap-3">
@@ -128,7 +130,8 @@ export function PlanModal({ isOpen, onClose, userId, userName, onSuccess }: Base
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -153,8 +156,8 @@ export function BlockModal({ isOpen, onClose, userId, userName, onSuccess, isBlo
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center">
       <div className="bg-[#181C28] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
         <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
           <div className="flex items-center gap-3">
@@ -186,7 +189,8 @@ export function BlockModal({ isOpen, onClose, userId, userName, onSuccess, isBlo
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -207,8 +211,8 @@ export function SoftDeleteModal({ isOpen, onClose, userId, userName, onSuccess }
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center">
       <div className="bg-[#181C28] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
         <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
           <div className="flex items-center gap-3">
@@ -232,6 +236,7 @@ export function SoftDeleteModal({ isOpen, onClose, userId, userName, onSuccess }
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
