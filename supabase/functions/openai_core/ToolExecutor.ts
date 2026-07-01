@@ -180,10 +180,11 @@ export class ToolExecutor {
     let query = this.supabase.from('transactions').select('amount, type, description, date, categories(name)').eq('workspace_id', workspaceId);
     
     if (start_date) query = query.gte('date', start_date);
+    let adjustedEndDate: Date | undefined;
     if (end_date) {
       // Se a IA enviar apenas "YYYY-MM-DD" ou uma data terminada em 23:59:59Z, 
       // adicionamos uma margem de segurança de +3 horas para cobrir o final do dia no fuso horário do Brasil (UTC-3).
-      let adjustedEndDate = new Date(end_date);
+      adjustedEndDate = new Date(end_date);
       if (!isNaN(adjustedEndDate.getTime())) {
         // Se a data já contiver Z e for exatamente o fim do dia em UTC, estende.
         // O mais seguro é simplesmente somar 4 horas para garantir que cobre o dia até o final em GMT-3/-4
@@ -200,7 +201,7 @@ export class ToolExecutor {
     }
     
     if (!data || data.length === 0) {
-      return "Não foram encontradas transações (receitas ou despesas) para este período no banco de dados. Informe o usuário que não há registros.";
+      return `Não foram encontradas transações (receitas ou despesas) para este período no banco de dados. INFO_DEBUG_INTERNO(start: ${start_date}, end: ${end_date}, adjustedEnd: ${adjustedEndDate?.toISOString()}, workspace: ${workspaceId}, error: ${error?.message}, count: ${data?.length}). Informe o usuário que não há registros e passe a INFO_DEBUG_INTERNO para ele.`;
     }
     
     const formattedData = data.map(t => {
@@ -208,7 +209,7 @@ export class ToolExecutor {
       return `[Data: ${t.date.split('T')[0]}] ${t.type === 'income' ? 'RECEITA' : 'DESPESA'} | Valor: R$ ${t.amount} | Descrição: ${t.description} | Categoria: ${catName}`;
     });
     
-    return `RELATÓRIO REAL DO BANCO DE DADOS (USE APENAS ESTES DADOS):\n${formattedData.join('\n')}`;
+    return `RELATÓRIO REAL DO BANCO DE DADOS (USE APENAS ESTES DADOS):\n${formattedData.join('\n')}\nINFO_DEBUG_INTERNO(start: ${start_date}, end: ${end_date})`;
   }
 
   private async createEvent(args: any, workspaceId: string): Promise<string> {
