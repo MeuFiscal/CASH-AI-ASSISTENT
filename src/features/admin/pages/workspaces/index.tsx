@@ -19,11 +19,15 @@ interface AdminWorkspace {
 export function AdminWorkspaces() {
   const [workspaces, setWorkspaces] = useState<AdminWorkspace[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadWorkspaces() {
       const { data, error } = await supabase.rpc('admin_get_workspaces');
-      if (!error && data) {
+      if (error) {
+        console.error('Error in admin_get_workspaces:', error);
+        setErrorMsg(error.message || 'Erro desconhecido ao carregar workspaces.');
+      } else if (data) {
         setWorkspaces(data as AdminWorkspace[]);
       }
       setLoading(false);
@@ -57,6 +61,12 @@ export function AdminWorkspaces() {
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center text-[#A8B3CF]">
                       Carregando workspaces...
+                    </td>
+                  </tr>
+                ) : errorMsg ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center text-red-500">
+                      Erro da API: {errorMsg}
                     </td>
                   </tr>
                 ) : workspaces.length === 0 ? (

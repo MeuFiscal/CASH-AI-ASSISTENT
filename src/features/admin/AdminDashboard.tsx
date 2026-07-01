@@ -23,7 +23,9 @@ export function AdminDashboard() {
   useEffect(() => {
     async function loadMetrics() {
       const { data, error } = await supabase.rpc('admin_get_metrics');
-      if (!error && data) {
+      if (error) {
+        console.error('Error fetching admin_get_metrics:', error);
+      } else if (data) {
         setMetrics(data as Metrics);
       }
       setLoading(false);

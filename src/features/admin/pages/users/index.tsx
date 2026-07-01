@@ -19,11 +19,15 @@ interface AdminUser {
 export function AdminUsers() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadUsers() {
       const { data, error } = await supabase.rpc('admin_get_users');
-      if (!error && data) {
+      if (error) {
+        console.error('Error in admin_get_users:', error);
+        setErrorMsg(error.message || 'Erro desconhecido ao carregar usuários.');
+      } else if (data) {
         setUsers(data as AdminUser[]);
       }
       setLoading(false);
@@ -51,11 +55,17 @@ export function AdminUsers() {
                   <th className="px-6 py-4 font-medium">Cadastro</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-white/5 bg-transparent">
                 {loading ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-12 text-center text-[#A8B3CF]">
                       Carregando usuários...
+                    </td>
+                  </tr>
+                ) : errorMsg ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-red-500">
+                      Erro da API: {errorMsg}
                     </td>
                   </tr>
                 ) : users.length === 0 ? (
