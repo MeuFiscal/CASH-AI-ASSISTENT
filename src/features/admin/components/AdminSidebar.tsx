@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, Building2, MessageSquare, 
   BrainCircuit, Wallet, Activity, Bell, Shield, Settings,
-  LogOut, Eye
+  LogOut, Eye, Server
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib';
@@ -13,6 +13,7 @@ const ADMIN_LINKS = [
   { to: '/admin/workspaces', icon: Building2, label: 'Workspaces' },
   { to: '/admin/whatsapp', icon: MessageSquare, label: 'WhatsApp' },
   { to: '/admin/openai', icon: BrainCircuit, label: 'OpenAI' },
+  { to: '/admin/health', icon: Server, label: 'Sistema' },
   { to: '/admin/subscriptions', icon: Wallet, label: 'Assinaturas' },
   { to: '/admin/analytics', icon: Activity, label: 'Analytics' },
   { to: '/admin/notifications', icon: Bell, label: 'Notificações' },

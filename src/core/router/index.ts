@@ -261,6 +261,13 @@ export const router = createBrowserRouter([
         }
       },
       {
+        path: 'health',
+        lazy: async () => {
+          const { AdminHealth } = await import('@/features/admin/pages/health');
+          return { Component: AdminHealth };
+        }
+      },
+      {
         path: 'subscriptions',
         lazy: async () => {
           const { AdminSubscriptions } = await import('@/features/admin/pages/subscriptions');
