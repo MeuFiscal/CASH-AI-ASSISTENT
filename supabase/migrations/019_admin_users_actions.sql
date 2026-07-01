@@ -2,6 +2,7 @@
 -- RPCs para executar as ações dos modais (Alterar Papel, Plano, Bloqueio, etc)
 
 -- 1. Alterar Papel (Role)
+DROP FUNCTION IF EXISTS admin_update_role(UUID, TEXT);
 CREATE OR REPLACE FUNCTION admin_update_role(p_user_id UUID, p_role TEXT)
 RETURNS VOID AS $$
 BEGIN
@@ -14,6 +15,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 2. Alterar Plano (Assinatura do Workspace Principal)
+DROP FUNCTION IF EXISTS admin_update_plan(UUID, UUID);
 CREATE OR REPLACE FUNCTION admin_update_plan(p_user_id UUID, p_plan_id UUID)
 RETURNS VOID AS $$
 DECLARE
@@ -44,6 +46,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 3. Bloquear Usuário
+DROP FUNCTION IF EXISTS admin_block_user(UUID, TEXT);
 CREATE OR REPLACE FUNCTION admin_block_user(p_user_id UUID, p_reason TEXT DEFAULT NULL)
 RETURNS VOID AS $$
 BEGIN
@@ -61,6 +64,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 4. Desbloquear / Ativar Usuário
+DROP FUNCTION IF EXISTS admin_activate_user(UUID);
 CREATE OR REPLACE FUNCTION admin_activate_user(p_user_id UUID)
 RETURNS VOID AS $$
 BEGIN
@@ -78,6 +82,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 5. Soft Delete (Desativar Conta)
+DROP FUNCTION IF EXISTS admin_soft_delete_user(UUID);
 CREATE OR REPLACE FUNCTION admin_soft_delete_user(p_user_id UUID)
 RETURNS VOID AS $$
 BEGIN
@@ -95,6 +100,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 6. Ver Perfil Completo 360 (User Drawer)
+DROP FUNCTION IF EXISTS admin_get_user(UUID);
 CREATE OR REPLACE FUNCTION admin_get_user(p_user_id UUID)
 RETURNS JSONB AS $$
 DECLARE
