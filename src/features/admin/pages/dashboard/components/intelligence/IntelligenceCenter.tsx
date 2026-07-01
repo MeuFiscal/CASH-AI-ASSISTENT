@@ -53,15 +53,19 @@ export function IntelligenceCenter() {
         body: JSON.stringify({ query: text })
       });
 
-      if (!response.ok) throw new Error('Falha ao processar consulta');
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error('Edge Function Error:', errText);
+        throw new Error(errText);
+      }
       
       const data = await response.json();
       
       const assistantMessage: Message = { id: (Date.now() + 1).toString(), role: 'assistant', content: data.reply || 'Desculpe, não consegui analisar os dados no momento.' };
       setMessages(prev => [...prev, assistantMessage]);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: '❌ Houve um erro ao processar sua solicitação.' }]);
+      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: `❌ Erro: ${error.message || 'Houve um erro ao processar sua solicitação.'}` }]);
     } finally {
       setLoading(false);
     }
