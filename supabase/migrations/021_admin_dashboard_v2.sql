@@ -45,7 +45,7 @@ BEGIN
     
     SELECT COUNT(*) INTO v_active_premium FROM public.subscriptions s JOIN public.plans p ON s.plan_id = p.id WHERE s.status = 'ACTIVE' AND p.price > 0;
     
-    SELECT COALESCE(SUM(tokens_used), 0) INTO v_tokens_today FROM public.messages WHERE created_at >= CURRENT_DATE AND sender_type = 'ai';
+    SELECT COALESCE(SUM((metadata->'tokens'->>'total')::numeric), 0) INTO v_tokens_today FROM public.whatsapp_messages WHERE created_at >= CURRENT_DATE;
     SELECT COUNT(*) INTO v_messages_today FROM public.whatsapp_messages WHERE created_at >= CURRENT_DATE;
     
     v_api_calls_today := 0;
@@ -163,7 +163,7 @@ BEGIN
         SELECT w.id, w.name AS empresa, p.name AS plano, 
                (SELECT COUNT(*) FROM public.workspace_members wm WHERE wm.workspace_id = w.id) AS usuarios,
                (SELECT COUNT(*) FROM public.whatsapp_messages msg WHERE msg.workspace_id = w.id) AS mensagens,
-               COALESCE((SELECT SUM(tokens_used) FROM public.messages m WHERE m.workspace_id = w.id), 0) AS tokens,
+               COALESCE((SELECT SUM((metadata->'tokens'->>'total')::numeric) FROM public.whatsapp_messages m WHERE m.workspace_id = w.id), 0) AS tokens,
                (SELECT COALESCE(SUM(amount), 0) FROM public.transactions tr WHERE tr.workspace_id = w.id) AS receita,
                w.updated_at AS ultimo_acesso,
                'Ativo' as status
