@@ -79,13 +79,27 @@ export async function bootstrapUser(userId: string, _userEmail?: string, userNam
       .maybeSingle();
 
     if (!subData) {
+      let planId: string | null = null;
       // Get the first available plan
       const { data: plans } = await supabase.from('plans').select('id').limit(1);
       
       if (plans && plans.length > 0) {
+        planId = plans[0].id;
+      } else {
+        // Fallback: create a dummy plan if the table is totally empty
+        const { data: newPlan } = await supabase.from('plans').insert({
+          name: 'Plano Básico (Sistema)',
+          description: 'Plano criado automaticamente pelo sistema',
+          price: 0,
+          billing_period: 'monthly'
+        }).select('id').single();
+        if (newPlan) planId = newPlan.id;
+      }
+
+      if (planId) {
         await supabase.from('subscriptions').insert({ 
           workspace_id: workspaceId,
-          plan_id: plans[0].id,
+          plan_id: planId,
           status: 'TRIALING'
         });
       }

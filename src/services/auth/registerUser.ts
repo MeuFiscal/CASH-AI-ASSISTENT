@@ -43,6 +43,9 @@ export async function registerUser(data: RegisterUserData) {
     return { success: true, user: authData.user, workspaceId: bootstrapResult.workspaceId };
   } catch (err: any) {
     console.error('Error in registerUser:', err);
+    if (err.message?.includes('already registered') || err.message?.includes('já cadastrado')) {
+      return { success: false, error: 'already_registered' };
+    }
     return { success: false, error: err.message };
   }
 }

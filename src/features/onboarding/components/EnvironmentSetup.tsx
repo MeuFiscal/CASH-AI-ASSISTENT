@@ -54,6 +54,9 @@ export function EnvironmentSetup({ onComplete, userData }: EnvironmentSetupProps
         const res = await registerUser(userData);
         
         if (!res.success) {
+          if (res.error === 'already_registered') {
+            throw new Error('ALREADY_REGISTERED');
+          }
           throw new Error(res.error || 'Failed to register');
         }
 
@@ -76,6 +79,26 @@ export function EnvironmentSetup({ onComplete, userData }: EnvironmentSetupProps
   }, [onComplete, userData]);
 
   if (error) {
+    if (error === 'ALREADY_REGISTERED') {
+      return (
+        <div className="flex flex-col items-center justify-center w-full h-full p-8 text-center animate-in zoom-in duration-500">
+          <div className="w-16 h-16 rounded-2xl bg-[#F59E0B]/10 border border-[#F59E0B]/20 flex items-center justify-center mb-6">
+             <User className="w-8 h-8 text-[#F59E0B]" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">Conta já existente</h2>
+          <p className="text-[#A8B3CF] mb-8 max-w-md leading-relaxed">
+            O e-mail <strong>{userData.email}</strong> já possui uma conta no Cash AI.
+          </p>
+          <button 
+            onClick={() => window.location.href = '/'}
+            className="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors rounded-xl text-white font-medium"
+          >
+            Fazer Login
+          </button>
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col items-center justify-center w-full h-full p-8 text-center">
         <h2 className="text-xl text-red-500 mb-2">Erro na criação do ambiente</h2>
