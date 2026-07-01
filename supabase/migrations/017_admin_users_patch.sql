@@ -94,22 +94,24 @@ BEGIN
             CASE WHEN p_sort_by = 'last_login_at' AND p_sort_dir = 'asc' THEN last_login_at END ASC,
             CASE WHEN p_sort_by = 'last_login_at' AND p_sort_dir = 'desc' THEN last_login_at END DESC,
             CASE WHEN p_sort_by NOT IN ('name', 'created_at', 'last_login_at') THEN created_at END DESC
+    ),
+    total_count AS (
+        SELECT COUNT(*) as total FROM ordered_users
+    ),
+    paginated_users AS (
+        SELECT * FROM ordered_users
+        LIMIT p_limit OFFSET v_offset
     )
-    SELECT COUNT(*) INTO v_total FROM ordered_users;
-
     SELECT jsonb_build_object(
         'data', COALESCE((
             SELECT jsonb_agg(row_to_json(u))
-            FROM (
-                SELECT * FROM ordered_users
-                LIMIT p_limit OFFSET v_offset
-            ) u
+            FROM paginated_users u
         ), '[]'::jsonb),
         'meta', jsonb_build_object(
-            'total', v_total,
+            'total', (SELECT total FROM total_count),
             'page', p_page,
             'limit', p_limit,
-            'total_pages', CEIL(v_total::numeric / p_limit::numeric)
+            'total_pages', CEIL((SELECT total FROM total_count)::numeric / p_limit::numeric)
         )
     ) INTO v_result;
 
