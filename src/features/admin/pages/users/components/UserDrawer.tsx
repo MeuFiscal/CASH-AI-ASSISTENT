@@ -3,9 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { 
-  X, Shield, Building2, CreditCard, 
-  Clock, MapPin, Monitor, Zap, 
-  Smartphone, HardDrive, Edit, LogOut
+  X, Building2, Zap, HardDrive
 } from 'lucide-react';
 
 interface UserDrawerProps {
@@ -14,6 +12,7 @@ interface UserDrawerProps {
   onUpdate: () => void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function UserDrawer({ userId, onClose, onUpdate }: UserDrawerProps) {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);

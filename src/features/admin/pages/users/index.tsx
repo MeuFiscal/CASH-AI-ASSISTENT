@@ -1,11 +1,13 @@
 import { useEffect, useState, useCallback } from 'react';
 import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '@/lib/supabase';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { format } from 'date-fns';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ptBR } from 'date-fns/locale';
 import { 
   Search, MoreVertical, Shield, CreditCard, 
-  Trash2, Mail, Smartphone, Filter, ChevronLeft, 
+  Trash2, Smartphone, ChevronLeft, 
   ChevronRight, Building2, Eye, Ban, CheckCircle, Upload, Key, LogIn
 } from 'lucide-react';
 import { UserDrawer } from './components/UserDrawer';
@@ -34,9 +36,9 @@ export function AdminUsers() {
   const [limit] = useState(20);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState('');
-  const [filters, setFilters] = useState({ status: '', role: '', plan: '' });
-  const [sortBy, setSortBy] = useState('created_at');
-  const [sortDir, setSortDir] = useState('desc');
+  const [filters] = useState<{ status?: string; role?: string }>({});
+  const [sortBy] = useState('created_at');
+  const [sortDir] = useState<'asc' | 'desc'>('desc');
   
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [selectedUserForDrawer, setSelectedUserForDrawer] = useState<string | null>(null);
