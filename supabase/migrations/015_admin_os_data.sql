@@ -53,7 +53,7 @@ BEGIN
     -- Simulação de uso de IA extraindo de metadados se existir, senão 0
     SELECT COALESCE(SUM((metadata->'tokens'->>'total')::numeric), 0) INTO v_ai_tokens_used
     FROM public.messages
-    WHERE source = 'ai' OR role = 'assistant';
+    WHERE role = 'assistant';
 
     v_result := jsonb_build_object(
         'total_users', v_total_users,
@@ -69,6 +69,8 @@ BEGIN
     );
 
     RETURN v_result;
+EXCEPTION WHEN OTHERS THEN
+    RETURN jsonb_build_object('error', SQLERRM);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
