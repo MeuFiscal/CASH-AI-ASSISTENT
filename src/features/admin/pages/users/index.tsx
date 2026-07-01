@@ -1,10 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '@/lib/supabase';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { format } from 'date-fns';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { ptBR } from 'date-fns/locale';
 import { 
   Search, MoreVertical, Shield, CreditCard, 
   Trash2, Smartphone, ChevronLeft, 
@@ -37,7 +33,7 @@ export function AdminUsers() {
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState('');
   const [filters] = useState<{ status?: string; role?: string }>({});
-  const [sortBy] = useState('created_at');
+  const [sortBy, setSortBy] = useState('created_at');
   const [sortDir] = useState<'asc' | 'desc'>('desc');
   
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);

@@ -12,8 +12,7 @@ interface UserDrawerProps {
   onUpdate: () => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function UserDrawer({ userId, onClose, onUpdate }: UserDrawerProps) {
+export function UserDrawer({ userId, onClose }: UserDrawerProps) {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'profile' | 'timeline' | 'permissions'>('profile');
