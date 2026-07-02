@@ -87,6 +87,13 @@ export const router = createBrowserRouter([
         }
       },
       {
+        path: 'reset-password',
+        lazy: async () => {
+          const { ResetPassword } = await import('@/features/auth/ResetPassword');
+          return { Component: ResetPassword };
+        }
+      },
+      {
         path: 'link-expired',
         lazy: async () => {
           const { LinkExpired } = await import('@/features/auth/LinkExpired');
