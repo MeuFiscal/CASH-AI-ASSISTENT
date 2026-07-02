@@ -47,7 +47,7 @@ export function ResetPassword() {
       
       setSuccess(true);
       setTimeout(() => {
-        navigate('/app');
+        navigate('/login-transition');
       }, 2000);
     } catch (err: any) {
       console.error(err);
