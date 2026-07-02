@@ -80,7 +80,7 @@ Responda SEMPRE em Português do Brasil.` },
 
     // 1ª Chamada para a OpenAI (para descobrir se ela quer usar alguma ferramenta)
     const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
+      model: 'gpt-4o',
       messages: messages as any,
       tools: tools as any,
       tool_choice: "auto",
@@ -122,7 +122,7 @@ Responda SEMPRE em Português do Brasil.` },
 
       // 2ª Chamada para a OpenAI com os dados do banco para formular a resposta final
       const secondResponse = await openai.chat.completions.create({
-        model: 'gpt-4-turbo-preview',
+        model: 'gpt-4o',
         messages: messages as any,
       });
 
