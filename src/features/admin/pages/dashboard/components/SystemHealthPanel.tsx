@@ -12,7 +12,7 @@ interface ServiceHealth {
 export function SystemHealthPanel({ loading }: { loading: boolean }) {
   const services: ServiceHealth[] = [
     { name: 'Supabase', status: 'online', latency: 45, lastCheck: 'agora', icon: Database },
-    { name: 'OpenAI API', status: 'online', latency: 248, lastCheck: 'agora', icon: BrainCircuit },
+    { name: 'Gemini API', status: 'online', latency: 248, lastCheck: 'agora', icon: BrainCircuit },
     { name: 'WhatsApp API', status: 'online', latency: 120, lastCheck: 'agora', icon: MessageCircle },
     { name: 'Stripe', status: 'online', latency: 85, lastCheck: 'agora', icon: CreditCard },
     { name: 'Vercel Edge', status: 'online', latency: 32, lastCheck: 'agora', icon: Zap },

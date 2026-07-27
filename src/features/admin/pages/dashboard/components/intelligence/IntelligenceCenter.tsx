@@ -20,7 +20,7 @@ export function IntelligenceCenter() {
     "Qual workspace mais cresce em receita?",
     "Quantos clientes tenho ativos hoje?",
     "Quais workspaces estão sem assinatura?",
-    "Qual o custo com OpenAI este mês?"
+    "Qual o custo com Gemini este mês?"
   ];
 
   const scrollToBottom = () => {

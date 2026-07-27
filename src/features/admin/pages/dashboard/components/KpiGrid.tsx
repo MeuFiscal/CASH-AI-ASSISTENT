@@ -8,7 +8,7 @@ export function KpiGrid({ metrics, loading }: { metrics: any, loading: boolean }
     { title: 'Assinantes Premium', value: metrics?.premium_subs || 0, trend: '+8%', icon: Activity, color: 'text-[#F59E0B]' },
     { title: 'Receita MRR', value: `R$ ${(metrics?.mrr || 0).toLocaleString('pt-BR')}`, trend: '+15%', icon: Wallet, color: 'text-[#8B5CF6]' },
     { title: 'Receita Total', value: `R$ ${(metrics?.revenue || 0).toLocaleString('pt-BR')}`, trend: '+20%', icon: BarChart, color: 'text-[#EC4899]' },
-    { title: 'Tokens OpenAI Hoje', value: metrics?.tokens_today || 0, trend: '+2%', icon: BrainCircuit, color: 'text-[#06B6D4]' },
+    { title: 'Tokens Gemini Hoje', value: metrics?.tokens_today || 0, trend: '+2%', icon: BrainCircuit, color: 'text-[#06B6D4]' },
     { title: 'Mensagens WhatsApp', value: metrics?.messages_today || 0, trend: '+18%', icon: MessageCircle, color: 'text-[#22C55E]' },
     { title: 'Chamadas API Hoje', value: metrics?.api_calls || 0, trend: '+10%', icon: Server, color: 'text-[#6366F1]' }
   ];

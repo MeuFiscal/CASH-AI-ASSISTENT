@@ -14,7 +14,7 @@ export function MyAI() {
   
   const [settings, setSettings] = useState({
     tone: 'Casual',
-    model: 'gpt-4o',
+    model: 'gemini-2.0-flash',
     language: 'pt-BR',
     personality: 'Trabalho',
     shortAnswers: false,
@@ -46,7 +46,7 @@ export function MyAI() {
             setSettings(prev => ({
               ...prev,
               tone: aiData.tone || 'Casual',
-              model: aiData.model || 'gpt-4o',
+              model: aiData.model || 'gemini-2.0-flash',
               language: aiData.language || 'pt-BR',
               personality: aiData.personality || 'Trabalho'
             }));
@@ -55,7 +55,7 @@ export function MyAI() {
             await supabase.from('workspace_ai').insert({
               workspace_id: ws.workspace_id,
               tone: 'Casual',
-              model: 'gpt-4o',
+              model: 'gemini-2.0-flash',
               language: 'pt-BR',
               personality: 'Assistente Executivo'
             });
@@ -169,8 +169,8 @@ export function MyAI() {
           {/* Modelos */}
           <PageSection title="Modelo de Inteligência">
           <div className="flex flex-col gap-5 p-6 sm:p-8 rounded-3xl bg-[#181C28]/60 border border-white/5 backdrop-blur-xl">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {['gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo'].map((option) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {['gemini-2.0-flash', 'gemini-2.0-flash-lite'].map((option) => (
                 <button 
                   key={option}
                   onClick={() => updateSetting('model', option)}

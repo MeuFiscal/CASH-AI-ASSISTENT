@@ -2,7 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.42.0';
 import { AIContextPayload } from './types.ts';
 import { buildSystemPrompt } from './PromptManager.ts';
 import { getTools } from './ToolRegistry.ts';
-import { OpenAIService } from './OpenAIService.ts';
+import { GeminiService } from './GeminiService.ts';
 import { ToolExecutor } from './ToolExecutor.ts';
 
 export class AIEngine {
@@ -37,8 +37,7 @@ export class AIEngine {
     let conversationHistory = [...history];
 
     if (channel === 'whatsapp' && contact_id) {
-      // Para WhatsApp: Ignora a tabela de conversas/messages do Web Chat
-      // Busca o histórico diretamente da whatsapp_messages
+      // Para WhatsApp: Busca o histórico diretamente da whatsapp_messages
       const { data: waHistory } = await this.supabase
         .from('whatsapp_messages')
         .select('direction, content')
@@ -47,10 +46,7 @@ export class AIEngine {
         .limit(10);
         
       if (waHistory) {
-        // Ordenar cronologicamente
         const sorted = waHistory.reverse();
-        // A última mensagem do usuário JÁ FOI salva no webhook, 
-        // mas para garantir que o formato correto vá pro prompt:
         conversationHistory = sorted.map(m => ({
           role: m.direction === 'inbound' ? 'user' : 'assistant',
           content: m.content || ''
@@ -146,18 +142,24 @@ export class AIEngine {
     // Regra anti-alucinação crítica
     systemPrompt += `\n[REGRA DE OURO - INTEGRIDADE DE DADOS]\nVOCÊ É PROIBIDO DE INVENTAR, SIMULAR OU ALUCINAR QUALQUER DADO FINANCEIRO OU COMPROMISSO. Se um usuário pedir um relatório ou saldo e a ferramenta retornar vazio, você DEVE dizer que não há dados reais cadastrados. NUNCA use dados de exemplo (ex: "Salário R$ 5.000"). Use ESTRITAMENTE os dados retornados pelas ferramentas.\n`;
 
-    // Histórico já foi montado na etapa inicial (conversationHistory)
-    
-    // 6. Preparar Ferramentas
+    // 5. Preparar Ferramentas
     const tools = getTools();
 
-    // 7. Processar no Serviço Central da OpenAI
-    const openAIService = new OpenAIService();
+    // 6. Processar no Gemini
+    const geminiService = new GeminiService();
     
-    const model = aiData?.model || 'gpt-4o';
+    // Mapear modelo do usuário para Gemini (ignorar nomes antigos de GPT)
+    const modelMap: Record<string, string> = {
+      'gpt-4o': 'gemini-2.0-flash',
+      'gpt-4-turbo': 'gemini-2.0-flash',
+      'gpt-4-turbo-preview': 'gemini-2.0-flash',
+      'gpt-3.5-turbo': 'gemini-2.0-flash-lite',
+    };
+    const requestedModel = aiData?.model || 'gemini-2.0-flash';
+    const model = modelMap[requestedModel] || requestedModel;
     const temperature = aiData?.temperature !== undefined ? aiData.temperature : 0.7;
 
-    let aiResponse = await openAIService.processMessage(
+    let aiResponse = await geminiService.processMessage(
       systemPrompt,
       conversationHistory,
       tools,
@@ -168,6 +170,7 @@ export class AIEngine {
     // ReAct Loop: Executar ferramentas se a IA solicitar
     if (aiResponse.toolCalls && aiResponse.toolCalls.length > 0) {
       const executor = new ToolExecutor(this.supabase);
+      const toolResults: { name: string; result: string }[] = [];
       
       for (const call of aiResponse.toolCalls) {
         if (call.type === 'function') {
@@ -175,28 +178,24 @@ export class AIEngine {
           const args = JSON.parse(fn.arguments || '{}');
           
           const result = await executor.executeTool(fn.name, args, workspace_id);
-          
-          // Injeta o resultado no histórico para a IA ler
-          conversationHistory.push({
-            role: 'assistant',
-            content: `[O sistema executou a ferramenta ${fn.name} com sucesso. Resultado: ${result}]`
-          });
+          toolResults.push({ name: fn.name, result });
         }
       }
       
-      // Chama a IA novamente para ela dar a resposta final com base no que foi feito
-      aiResponse = await openAIService.processMessage(
+      // Chama o Gemini novamente com os resultados das ferramentas
+      aiResponse = await geminiService.processWithToolResults(
         systemPrompt,
         conversationHistory,
-        [], // Não enviamos as ferramentas novamente para forçar uma resposta de texto
+        aiResponse.toolCalls,
+        toolResults,
         model,
         temperature
       );
     }
     
-    // Gravar Mensagem da IA com Metadados (Apenas se não for WhatsApp, pois WhatsApp será gravado via Edge Function de envio)
+    // Gravar Mensagem da IA com Metadados
     if (channel !== 'whatsapp' && conversation_id) {
-      const estimatedCost = aiResponse.usage ? (aiResponse.usage.total_tokens * 0.000005).toFixed(6) : 0;
+      const estimatedCost = 0; // Gemini Flash é gratuito!
       await this.supabase.from('messages').insert({
         conversation_id,
         workspace_id,
