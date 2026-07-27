@@ -30,7 +30,7 @@ export class GeminiService {
     systemPrompt: string,
     history: { role: string; content: string }[],
     tools: any[],
-    model: string = 'gemini-2.0-flash',
+    model: string = 'gemini-flash-latest',
     temperature: number = 0.7
   ) {
     const startTime = Date.now();
@@ -132,7 +132,7 @@ export class GeminiService {
     history: { role: string; content: string }[],
     toolCalls: any[],
     toolResults: { name: string; result: string }[],
-    model: string = 'gemini-2.0-flash',
+    model: string = 'gemini-flash-latest',
     temperature: number = 0.7
   ) {
     const startTime = Date.now();

@@ -68,7 +68,7 @@ serve(async (req) => {
 
     // 1ª Chamada para o Gemini
     const firstResponse = await fetch(
-      `${GEMINI_BASE_URL}/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`,
+      `${GEMINI_BASE_URL}/models/gemini-flash-latest:generateContent?key=${geminiApiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -134,7 +134,7 @@ Responda SEMPRE em Português do Brasil.` }]
 
       // 2ª Chamada para o Gemini com os resultados das funções
       const secondResponse = await fetch(
-        `${GEMINI_BASE_URL}/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`,
+        `${GEMINI_BASE_URL}/models/gemini-flash-latest:generateContent?key=${geminiApiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

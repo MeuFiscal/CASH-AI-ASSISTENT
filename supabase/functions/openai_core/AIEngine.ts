@@ -148,15 +148,17 @@ export class AIEngine {
     // 6. Processar no Gemini
     const geminiService = new GeminiService();
     
-    // Mapear modelo do usuário para Gemini (ignorar nomes antigos de GPT)
+    // Mapear modelo do usuário para Gemini (usando gemini-flash-latest ativo)
     const modelMap: Record<string, string> = {
-      'gpt-4o': 'gemini-2.0-flash',
-      'gpt-4-turbo': 'gemini-2.0-flash',
-      'gpt-4-turbo-preview': 'gemini-2.0-flash',
-      'gpt-3.5-turbo': 'gemini-2.0-flash-lite',
+      'gpt-4o': 'gemini-flash-latest',
+      'gpt-4-turbo': 'gemini-flash-latest',
+      'gpt-4-turbo-preview': 'gemini-flash-latest',
+      'gpt-3.5-turbo': 'gemini-flash-latest',
+      'gemini-2.0-flash': 'gemini-flash-latest',
+      'gemini-2.0-flash-lite': 'gemini-flash-latest',
     };
-    const requestedModel = aiData?.model || 'gemini-2.0-flash';
-    const model = modelMap[requestedModel] || requestedModel;
+    const requestedModel = aiData?.model || 'gemini-flash-latest';
+    const model = modelMap[requestedModel] || 'gemini-flash-latest';
     const temperature = aiData?.temperature !== undefined ? aiData.temperature : 0.7;
 
     let aiResponse = await geminiService.processMessage(
