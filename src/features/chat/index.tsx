@@ -131,6 +131,13 @@ export function Chat() {
     }
   };
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return 'Bom dia';
+    if (hour >= 12 && hour < 18) return 'Boa tarde';
+    return 'Boa noite';
+  };
+
   return (
     <DashboardLayout>
       <PageContainer>
@@ -139,7 +146,7 @@ export function Chat() {
         {/* Header Narrativo */}
         <div className="flex flex-col gap-4 mb-8 shrink-0">
           <h1 className="text-3xl font-black text-white tracking-tight">
-            Bom dia, {firstName} 👋
+            {getGreeting()}, {firstName} 👋
           </h1>
         </div>
 

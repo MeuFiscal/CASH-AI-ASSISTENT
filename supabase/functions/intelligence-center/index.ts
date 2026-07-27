@@ -82,7 +82,7 @@ Seja educado e forneça insights interessantes se notar algum dado peculiar.
 Responda SEMPRE em Português do Brasil.` }]
           },
           tools,
-          generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+          generationConfig: { temperature: 0.7, maxOutputTokens: 2048, thinkingConfig: { thinkingBudget: 0 } }
         })
       }
     );
@@ -150,7 +150,7 @@ Responda de forma concisa, executiva e direta ao ponto.
 Seja educado e forneça insights interessantes se notar algum dado peculiar.
 Responda SEMPRE em Português do Brasil.` }]
             },
-            generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+            generationConfig: { temperature: 0.7, maxOutputTokens: 2048, thinkingConfig: { thinkingBudget: 0 } }
           })
         }
       );
