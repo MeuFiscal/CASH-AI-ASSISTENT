@@ -188,7 +188,7 @@ export class AIEngine {
       aiResponse = await geminiService.processWithToolResults(
         systemPrompt,
         conversationHistory,
-        aiResponse.toolCalls,
+        aiResponse.rawContent,
         toolResults,
         model,
         temperature

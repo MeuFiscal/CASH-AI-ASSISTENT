@@ -1,16 +1,15 @@
 /**
- * GeminiService — Motor de IA usando Google Gemini 2.0 Flash (gratuito)
- * Substitui completamente o OpenAIService.ts
+ * GeminiService — Motor de IA usando Google Gemini API REST (gratuito e ultrarrápido)
  */
 
 interface GeminiPart {
   text?: string;
   functionCall?: { name: string; args: Record<string, any> };
-  functionResponse?: { name: string; response: { result: string } };
+  functionResponse?: { name: string; response: Record<string, any> };
 }
 
 interface GeminiContent {
-  role: 'user' | 'model' | 'function';
+  role: 'user' | 'model';
   parts: GeminiPart[];
 }
 
@@ -35,13 +34,19 @@ export class GeminiService {
   ) {
     const startTime = Date.now();
 
-    // Converter histórico do formato OpenAI para formato Gemini
-    const contents: GeminiContent[] = history.map(msg => ({
-      role: msg.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: msg.content }]
-    }));
+    // Converter histórico do formato OpenAI para formato Gemini (filtrando mensagens vazias)
+    const contents: GeminiContent[] = history
+      .filter(msg => msg.content && msg.content.trim().length > 0)
+      .map(msg => ({
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: msg.content }]
+      }));
 
-    // Montar corpo da requisição
+    // Se o histórico estiver vazio por algum motivo, garante ao menos a mensagem inicial
+    if (contents.length === 0) {
+      contents.push({ role: 'user', parts: [{ text: 'Olá' }] });
+    }
+
     const body: any = {
       contents,
       systemInstruction: {
@@ -53,7 +58,6 @@ export class GeminiService {
       }
     };
 
-    // Adicionar ferramentas se houver
     if (tools && tools.length > 0) {
       body.tools = [{ functionDeclarations: tools }];
     }
@@ -76,15 +80,15 @@ export class GeminiService {
       const data = await response.json();
       const latency = Date.now() - startTime;
 
-      // Extrair resposta
       const candidate = data.candidates?.[0];
       if (!candidate) {
         throw new Error('Gemini não retornou uma resposta válida.');
       }
 
-      const parts = candidate.content?.parts || [];
+      const rawContent = candidate.content; // Preserva o objeto completo (incluindo thoughtSignature)
+      const parts = rawContent?.parts || [];
       
-      // Verificar se há function calls
+      // Extrair chamadas de função
       const functionCalls = parts
         .filter((p: GeminiPart) => p.functionCall)
         .map((p: GeminiPart, index: number) => ({
@@ -102,7 +106,6 @@ export class GeminiService {
         .map((p: GeminiPart) => p.text)
         .join('');
 
-      // Uso de tokens (Gemini retorna em usageMetadata)
       const usage = data.usageMetadata ? {
         prompt_tokens: data.usageMetadata.promptTokenCount || 0,
         completion_tokens: data.usageMetadata.candidatesTokenCount || 0,
@@ -114,6 +117,7 @@ export class GeminiService {
       return {
         content: textContent || null,
         toolCalls: functionCalls.length > 0 ? functionCalls : undefined,
+        rawContent, // Retorna o conteúdo bruto original para a 2ª chamada
         usage,
         latency,
       };
@@ -124,13 +128,12 @@ export class GeminiService {
   }
 
   /**
-   * Processa mensagem com resultados de ferramentas (2ª chamada)
-   * No Gemini, precisamos enviar o histórico completo incluindo as chamadas de função e respostas
+   * Processa a 2ª chamada enviando os resultados das ferramentas
    */
   async processWithToolResults(
     systemPrompt: string,
     history: { role: string; content: string }[],
-    toolCalls: any[],
+    rawModelContent: any,
     toolResults: { name: string; result: string }[],
     model: string = 'gemini-flash-latest',
     temperature: number = 0.7
@@ -138,28 +141,28 @@ export class GeminiService {
     const startTime = Date.now();
 
     // Converter histórico base
-    const contents: any[] = history.map(msg => ({
-      role: msg.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: msg.content }]
-    }));
+    const contents: any[] = history
+      .filter(msg => msg.content && msg.content.trim().length > 0)
+      .map(msg => ({
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: msg.content }]
+      }));
 
-    // Adicionar as chamadas de função que o modelo fez
-    const functionCallParts = toolCalls.map(tc => ({
-      functionCall: {
-        name: tc.function.name,
-        args: JSON.parse(tc.function.arguments || '{}'),
-      }
-    }));
-    contents.push({ role: 'model', parts: functionCallParts });
+    // 1. Anexa o conteúdo bruto gerado pelo Gemini (que contém o functionCall e o thoughtSignature)
+    contents.push(rawModelContent);
 
-    // Adicionar as respostas das ferramentas
+    // 2. Anexa as respostas das ferramentas com o role "user" (padrão do Gemini REST API)
     const functionResponseParts = toolResults.map(tr => ({
       functionResponse: {
         name: tr.name,
         response: { result: tr.result }
       }
     }));
-    contents.push({ role: 'function', parts: functionResponseParts });
+
+    contents.push({
+      role: 'user',
+      parts: functionResponseParts
+    });
 
     const body: any = {
       contents,
@@ -183,7 +186,8 @@ export class GeminiService {
 
       if (!response.ok) {
         const errorBody = await response.text();
-        throw new Error(`Gemini API error ${response.status}: ${errorBody}`);
+        console.error('[Gemini Service] Erro na 2ª chamada:', response.status, errorBody);
+        throw new Error(`Gemini API 2nd call error ${response.status}: ${errorBody}`);
       }
 
       const data = await response.json();
