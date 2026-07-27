@@ -72,14 +72,27 @@ export function RoleModal({ isOpen, onClose, userId, userName, onSuccess }: Base
   );
 }
 
+const DEFAULT_PLANS = [
+  { id: '00000000-0000-0000-0000-000000000001', name: 'Gratuito', price: 0, billing_period: 'mensal' },
+  { id: '00000000-0000-0000-0000-000000000002', name: 'Pro (Segundo Cérebro)', price: 29.90, billing_period: 'mensal' },
+  { id: '00000000-0000-0000-0000-000000000003', name: 'Business', price: 59.90, billing_period: 'mensal' },
+  { id: '00000000-0000-0000-0000-000000000004', name: 'Enterprise / Ilimitado', price: 99.90, billing_period: 'mensal' }
+];
+
 export function PlanModal({ isOpen, onClose, userId, userName, onSuccess }: BaseModalProps & { currentPlan?: string }) {
   const [planId, setPlanId] = useState('');
-  const [plans, setPlans] = useState<any[]>([]);
+  const [plans, setPlans] = useState<any[]>(DEFAULT_PLANS);
   const [loading, setLoading] = useState(false);
 
   React.useEffect(() => {
     if (isOpen) {
-      supabase.from('plans').select('*').then(({ data }) => setPlans(data || []));
+      supabase.from('plans').select('*').then(({ data }) => {
+        if (data && data.length > 0) {
+          setPlans(data);
+        } else {
+          setPlans(DEFAULT_PLANS);
+        }
+      });
     }
   }, [isOpen]);
 
@@ -117,7 +130,9 @@ export function PlanModal({ isOpen, onClose, userId, userName, onSuccess }: Base
                 <input type="radio" name="plan" value={p.id} checked={planId === p.id} onChange={(e) => setPlanId(e.target.value)} className="w-4 h-4 accent-purple-500" />
                 <div className="flex flex-col">
                   <span className="text-sm text-white font-medium">{p.name}</span>
-                  <span className="text-xs text-[#A8B3CF]">R$ {p.price} / {p.interval}</span>
+                  <span className="text-xs text-[#A8B3CF]">
+                    {Number(p.price) === 0 ? 'Grátis' : `R$ ${p.price} / ${p.billing_period || p.interval || 'mensal'}`}
+                  </span>
                 </div>
               </label>
             ))}
