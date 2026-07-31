@@ -9,11 +9,11 @@ export function HeroInteligente() {
 
   return (
     <section className="w-full rounded-[2rem] border border-white/10 bg-[#111827]/70 p-8 md:p-12 shadow-2xl backdrop-blur-xl">
-      <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
+      <div className="mx-auto flex w-full max-w-[768px] flex-col items-center text-center">
         <div className="mb-6 flex items-center gap-2 rounded-full border border-blue-400/20 bg-blue-400/10 px-4 py-2 text-sm text-blue-200">
           <Sparkles className="h-4 w-4" /> Inteligência privada e contextual
         </div>
-        <h1 className="text-4xl font-black tracking-tight text-white md:text-6xl">
+        <h1 className="w-full text-4xl font-black leading-tight tracking-tight text-white md:text-6xl">
           Uma IA que trabalha com os seus dados, sem misturá-los com ninguém.
         </h1>
         <p className="mt-6 max-w-2xl text-base leading-relaxed text-[#A8B3CF] md:text-lg">
