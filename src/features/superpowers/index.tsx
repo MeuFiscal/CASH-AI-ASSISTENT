@@ -6,12 +6,18 @@ import { PageContainer } from '@/components/PageContainer';
 import { PageHeader } from '@/components/PageHeader';
 import { PageSection } from '@/components/PageSection';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function Superpowers() {
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const navigate = useNavigate();
+  const { globalRole } = useAuth();
 
   const handlePremiumClick = () => {
+    if (globalRole === 'super_admin') {
+      alert('Acesso liberado para Superadmin. A configuração desta integração estará disponível em breve.');
+      return;
+    }
     setIsPremiumModalOpen(true);
   };
 

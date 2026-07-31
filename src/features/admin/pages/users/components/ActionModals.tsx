@@ -72,26 +72,30 @@ export function RoleModal({ isOpen, onClose, userId, userName, onSuccess }: Base
   );
 }
 
-const DEFAULT_PLANS = [
-  { id: '00000000-0000-0000-0000-000000000001', name: 'Gratuito', price: 0, billing_period: 'mensal' },
-  { id: '00000000-0000-0000-0000-000000000002', name: 'Pro (Segundo Cérebro)', price: 29.90, billing_period: 'mensal' },
-  { id: '00000000-0000-0000-0000-000000000003', name: 'Business', price: 59.90, billing_period: 'mensal' },
-  { id: '00000000-0000-0000-0000-000000000004', name: 'Enterprise / Ilimitado', price: 99.90, billing_period: 'mensal' }
-];
-
 export function PlanModal({ isOpen, onClose, userId, userName, onSuccess }: BaseModalProps & { currentPlan?: string }) {
   const [planId, setPlanId] = useState('');
-  const [plans, setPlans] = useState<any[]>(DEFAULT_PLANS);
+  const [plans, setPlans] = useState<any[]>([]);
+  const [plansLoading, setPlansLoading] = useState(false);
+  const [plansError, setPlansError] = useState('');
   const [loading, setLoading] = useState(false);
 
   React.useEffect(() => {
     if (isOpen) {
-      supabase.from('plans').select('*').then(({ data }) => {
-        if (data && data.length > 0) {
-          setPlans(data);
-        } else {
-          setPlans(DEFAULT_PLANS);
+      setPlanId('');
+      setPlans([]);
+      setPlansError('');
+      setPlansLoading(true);
+      supabase.from('plans').select('id, name, price, billing_period').eq('is_active', true).order('price').then(({ data, error }) => {
+        setPlansLoading(false);
+        if (error) {
+          setPlansError('Não foi possível carregar os planos cadastrados.');
+          return;
         }
+        if (!data?.length) {
+          setPlansError('Nenhum plano ativo está cadastrado no banco de dados.');
+          return;
+        }
+        setPlans(data);
       });
     }
   }, [isOpen]);
@@ -125,6 +129,12 @@ export function PlanModal({ isOpen, onClose, userId, userName, onSuccess }: Base
             Selecione o novo plano para o workspace principal de <strong className="text-white">{userName}</strong>.
           </p>
           <div className="space-y-2 pt-2">
+            {plansLoading && <p className="text-sm text-[#A8B3CF]">Carregando planos...</p>}
+            {plansError && (
+              <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-200">
+                {plansError} Atualize as configurações de planos antes de alterar a assinatura.
+              </div>
+            )}
             {plans.map((p) => (
               <label key={p.id} className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-colors ${planId === p.id ? 'bg-purple-500/10 border-purple-500/50' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}>
                 <input type="radio" name="plan" value={p.id} checked={planId === p.id} onChange={(e) => setPlanId(e.target.value)} className="w-4 h-4 accent-purple-500" />
@@ -140,7 +150,7 @@ export function PlanModal({ isOpen, onClose, userId, userName, onSuccess }: Base
         </div>
         <div className="p-6 border-t border-white/5 flex gap-3 bg-black/20">
           <button onClick={onClose} className="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-sm font-medium transition-colors">Cancelar</button>
-          <button onClick={handleSave} disabled={loading || !planId} className="flex-1 px-4 py-2 bg-purple-500 hover:bg-purple-600 disabled:opacity-50 text-white rounded-xl text-sm font-medium transition-colors">
+          <button onClick={handleSave} disabled={loading || plansLoading || !!plansError || !planId} className="flex-1 px-4 py-2 bg-purple-500 hover:bg-purple-600 disabled:opacity-50 text-white rounded-xl text-sm font-medium transition-colors">
             {loading ? 'Salvando...' : 'Confirmar'}
           </button>
         </div>

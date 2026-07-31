@@ -7,13 +7,13 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface Subscription {
   id: string;
-  plan_name: string;
   status: string;
   current_period_end: string;
+  plans?: { name?: string } | null;
 }
 
 export function Premium() {
-  const { user } = useAuth();
+  const { user, globalRole } = useAuth();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -32,15 +32,14 @@ export function Premium() {
           // Buscar subscription
           const { data: sub } = await supabase
             .from('subscriptions')
-            .select('*')
+            .select('id, status, current_period_end, plans(name)')
             .eq('workspace_id', ws.workspace_id)
+            .in('status', ['ACTIVE', 'TRIALING'])
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();
             
-          if (sub && sub.status === 'active') {
-            setSubscription(sub as Subscription);
-          }
+          if (sub) setSubscription(sub as unknown as Subscription);
         }
       }
       setLoading(false);
@@ -60,7 +59,8 @@ export function Premium() {
     );
   }
 
-  const isPremium = !!subscription;
+  const isSuperAdmin = globalRole === 'super_admin';
+  const isPremium = isSuperAdmin || !!subscription;
 
   return (
     <DashboardLayout>
@@ -78,13 +78,13 @@ export function Premium() {
                 Você é um membro <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F59E0B] to-[#FCD34D]">Premium</span>
               </h1>
               <p className="text-[#A8B3CF] text-lg max-w-[600px] mb-8">
-                Seu plano está ativo e seu Assistente Executivo está 100% operacional.
+                {isSuperAdmin ? 'Seu acesso de Superadmin libera todos os recursos do aplicativo.' : 'Seu plano está ativo e seu Assistente Executivo está 100% operacional.'}
               </p>
               
               <div className="flex flex-col gap-4 text-left w-full max-w-md bg-[#181C28]/60 border border-white/5 rounded-3xl p-6 backdrop-blur-xl">
                 <div className="flex justify-between items-center pb-4 border-b border-white/5">
                   <span className="text-[#A8B3CF] text-sm">Plano Atual</span>
-                  <span className="text-white font-bold uppercase tracking-wider">{subscription.plan_name || 'Premium'}</span>
+                  <span className="text-white font-bold uppercase tracking-wider">{isSuperAdmin ? 'Superadmin — acesso total' : subscription?.plans?.name || 'Premium'}</span>
                 </div>
                 <div className="flex justify-between items-center pb-4 border-b border-white/5">
                   <span className="text-[#A8B3CF] text-sm">Status</span>
@@ -92,7 +92,7 @@ export function Premium() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-[#A8B3CF] text-sm">Renovação</span>
-                  <span className="text-white">{subscription.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString('pt-BR') : 'Não informada'}</span>
+                  <span className="text-white">{isSuperAdmin ? 'Não se aplica' : subscription?.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString('pt-BR') : 'Não informada'}</span>
                 </div>
               </div>
             </>
