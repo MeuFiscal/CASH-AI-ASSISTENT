@@ -3,7 +3,7 @@ import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '@/lib/supabase';
 import { 
   Search, MoreVertical, Shield, CreditCard, 
-  Trash2, Smartphone, ChevronLeft, 
+  Trash2, ChevronLeft,
   ChevronRight, Building2, Eye, Ban, CheckCircle, Upload, Key, LogIn
 } from 'lucide-react';
 import { UserDrawer } from './components/UserDrawer';
@@ -17,7 +17,6 @@ interface AdminUser {
   role: string;
   status: string;
   plan_name: string;
-  whatsapp_status: string;
   workspace_name: string;
   last_login_at: string;
   created_at: string;
@@ -76,15 +75,6 @@ export function AdminUsers() {
   useEffect(() => {
     loadUsers();
   }, [loadUsers]);
-
-  // Debounced search
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setPage(1); // Reset page on new search
-      loadUsers();
-    }, 500);
-    return () => clearTimeout(handler);
-  }, [search]); // Intentionally omitting loadUsers to avoid double fetch
 
   const toggleSelect = (id: string) => {
     setSelectedUsers(prev => prev.includes(id) ? prev.filter(u => u !== id) : [...prev, id]);
@@ -145,7 +135,7 @@ export function AdminUsers() {
                   <th className="px-6 py-4 font-medium cursor-pointer hover:text-white" onClick={() => setSortBy('name')}>Usuário</th>
                   <th className="px-6 py-4 font-medium">Workspace</th>
                   <th className="px-6 py-4 font-medium">Plano & Role</th>
-                  <th className="px-6 py-4 font-medium">Status & WhatsApp</th>
+                  <th className="px-6 py-4 font-medium">Status</th>
                   <th className="px-6 py-4 font-medium text-right">Ações</th>
                 </tr>
               </thead>
@@ -214,12 +204,6 @@ export function AdminUsers() {
                             <span className={`w-2 h-2 rounded-full ${user.status === 'active' ? 'bg-green-500' : user.status === 'blocked' ? 'bg-red-500' : 'bg-yellow-500'}`} />
                             <span className="text-xs capitalize">{user.status}</span>
                           </div>
-                          {user.whatsapp_status && (
-                            <div className="flex items-center gap-1.5 text-xs text-white/50">
-                              <Smartphone className="w-3 h-3" />
-                              <span className={user.whatsapp_status === 'active' ? 'text-green-400' : ''}>{user.whatsapp_status}</span>
-                            </div>
-                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-right relative">

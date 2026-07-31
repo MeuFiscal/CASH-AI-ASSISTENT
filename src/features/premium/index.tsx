@@ -147,7 +147,7 @@ export function Premium() {
               <ul className="flex flex-col gap-4 relative z-10">
                 <li className="flex gap-3 text-white">
                   <CheckCircle2 className="w-5 h-5 text-[#F59E0B] shrink-0" />
-                  <span className="text-[16px] font-medium leading-relaxed">Manda áudio no WhatsApp e a IA resolve tudo.</span>
+                  <span className="text-[16px] font-medium leading-relaxed">Converse no painel e a IA organiza as informações autorizadas.</span>
                 </li>
                 <li className="flex gap-3 text-white">
                   <CheckCircle2 className="w-5 h-5 text-[#F59E0B] shrink-0" />

@@ -5,14 +5,6 @@ import { ChatBubble, TypingIndicator, ChatSuggestion } from './ChatComponents';
 import { useOnboardingChat } from '../hooks/useOnboardingChat';
 import { EnvironmentSetup } from './EnvironmentSetup';
 
-// Simple masked input for WhatsApp: (XX) XXXXX-XXXX
-function formatWhatsApp(value: string) {
-  const v = value.replace(/\D/g, '');
-  if (v.length <= 2) return v.replace(/(\d{2})/, '($1');
-  if (v.length <= 7) return v.replace(/(\d{2})(\d+)/, '($1) $2');
-  return v.replace(/(\d{2})(\d{5})(\d{1,4})/, '($1) $2-$3').substring(0, 15);
-}
-
 export function OnboardingFlow() {
   const navigate = useNavigate();
   const { messages, isTyping, phase, userData, handleInput, handleSuggestionSelect } = useOnboardingChat();
@@ -54,7 +46,7 @@ export function OnboardingFlow() {
       { label: 'Microsoft', value: 'microsoft' },
       { label: 'Outro', value: 'outro' }
     ];
-  } else if (phase === 'wait-notifications' || phase === 'wait-summary') {
+  } else if (phase === 'wait-summary') {
     suggestions = [
       { label: 'Sim', value: 'yes' },
       { label: 'Não', value: 'no' }
@@ -103,15 +95,8 @@ export function OnboardingFlow() {
             <input
               type={phase.includes('password') ? 'password' : phase === 'wait-email' ? 'email' : 'text'}
               value={inputValue}
-              onChange={(e) => {
-                if (phase === 'wait-phone') {
-                  setInputValue(formatWhatsApp(e.target.value));
-                } else {
-                  setInputValue(e.target.value);
-                }
-              }}
+              onChange={(e) => setInputValue(e.target.value)}
               placeholder={
-                phase === 'wait-phone' ? '(00) 00000-0000' : 
                 phase.includes('password') ? '••••••••' : 
                 'Digite aqui...'
               }

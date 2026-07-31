@@ -35,8 +35,6 @@ export interface User {
   phone: string;
   address?: string;
   avatarUrl?: string;
-  whatsapp: string;
-  whatsappConnected: boolean;
   status: UserStatus;
   
   // Organization bindings

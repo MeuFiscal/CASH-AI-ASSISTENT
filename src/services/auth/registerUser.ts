@@ -4,24 +4,22 @@ import { supabase } from '@/lib/supabase';
 export interface RegisterUserData {
   email: string;
   password?: string;
-  phone?: string;
   name: string;
 }
 
 export async function registerUser(data: RegisterUserData) {
   try {
-    // Determine the email to use (supabase auth requires email or phone).
-    // If they used whatsapp but no email, we could construct a dummy email or use phone auth.
-    // For now, we assume email and password are provided by onboarding, or fallback to phone auth later.
-    
-    // We will do standard email signup
+    if (!data.password || data.password.length < 10) {
+      return { success: false, error: 'A senha deve ter pelo menos 10 caracteres.' };
+    }
+
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: data.email,
-      password: data.password || 'CashAI123!@#', // Fallback if no password provided during onboarding
+      password: data.password,
       options: {
         data: {
           name: data.name,
-          phone: data.phone,
+          onboarding_completed: false,
         }
       }
     });

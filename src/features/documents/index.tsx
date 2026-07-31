@@ -96,7 +96,9 @@ export function Documents() {
         const filePath = pathParts[1];
         await supabase.storage.from('documents').remove([decodeURIComponent(filePath)]);
       }
-    } catch (err) {}
+    } catch {
+      // O registro ainda será removido mesmo se a URL antiga não puder ser interpretada.
+    }
 
     const { error } = await supabase.from('documents').delete().eq('id', id);
     if (!error) {

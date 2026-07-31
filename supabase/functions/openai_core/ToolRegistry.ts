@@ -1,8 +1,5 @@
 /**
- * ToolRegistry — Ferramentas da IA no formato Google Gemini (functionDeclarations)
- * 
- * Migrado do formato OpenAI para o formato Gemini.
- * A estrutura do Gemini é mais simples: não precisa do wrapper "type: function".
+ * ToolRegistry — contratos das ferramentas aceitos pelo servidor de IA local.
  */
 
 export const availableTools = [
@@ -17,9 +14,10 @@ export const availableTools = [
         amount: { type: "number", description: "Valor da despesa" },
         date: { type: "string", description: "Data no formato ISO 8601" },
         category_name: { type: "string", description: "Nome da categoria (ex: Alimentação)" },
-        account_name: { type: "string", description: "Nome da conta (ex: Nubank)" }
+        account_name: { type: "string", description: "Nome da conta (ex: Nubank)" },
+        confirmed: { type: "boolean", description: "True somente após confirmação explícita do usuário" }
       },
-      required: ["description", "amount"]
+      required: ["description", "amount", "confirmed"]
     }
   },
   {
@@ -56,9 +54,10 @@ export const availableTools = [
         amount: { type: "number", description: "Valor da receita" },
         date: { type: "string", description: "Data no formato ISO 8601" },
         category_name: { type: "string", description: "Nome da categoria (ex: Salário)" },
-        account_name: { type: "string", description: "Nome da conta (ex: Itaú)" }
+        account_name: { type: "string", description: "Nome da conta (ex: Itaú)" },
+        confirmed: { type: "boolean", description: "True somente após confirmação explícita do usuário" }
       },
-      required: ["description", "amount"]
+      required: ["description", "amount", "confirmed"]
     }
   },
   {
@@ -219,32 +218,6 @@ export const availableTools = [
         query: { type: "string", description: "Texto de busca" }
       },
       required: ["query"]
-    }
-  },
-
-  // ── Integração ──
-  {
-    name: "enviar_whatsapp",
-    description: "Prepara ou agenda envio de mensagem via WhatsApp.",
-    parameters: {
-      type: "object",
-      properties: {
-        to: { type: "string", description: "Número do destinatário" },
-        text: { type: "string", description: "Texto da mensagem" }
-      },
-      required: ["to", "text"]
-    }
-  },
-  {
-    name: "responder_whatsapp",
-    description: "Formata e dispara a resposta para um evento de recepção no WhatsApp.",
-    parameters: {
-      type: "object",
-      properties: {
-        message_id: { type: "string", description: "ID da mensagem original" },
-        text: { type: "string", description: "Texto da resposta" }
-      },
-      required: ["message_id", "text"]
     }
   }
 ];

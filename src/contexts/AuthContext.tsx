@@ -49,34 +49,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           phone: session.user.user_metadata?.phone || session.user.phone || '',
           address: session.user.user_metadata?.address || '',
           avatarUrl: session.user.user_metadata?.avatar_url || '',
-          whatsapp: session.user.user_metadata?.whatsapp || '',
-          whatsappConnected: !!session.user.user_metadata?.whatsapp,
           status: (session.user.user_metadata?.status as UserStatus) || 'ACTIVE',
-          onboardingCompleted: true,
-          firstAccess: false,
+          onboardingCompleted: session.user.user_metadata?.onboarding_completed === true,
+          firstAccess: session.user.user_metadata?.onboarding_completed !== true,
           createdAt: session.user.created_at,
           updatedAt: session.user.updated_at || session.user.created_at,
         };
 
-        const adminEmail = import.meta.env.VITE_BOOTSTRAP_ADMIN_EMAIL;
         let role: GlobalRole = 'user';
-
-        if (adminEmail && session.user.email === adminEmail) {
-          try {
-            await supabase.rpc('bootstrap_super_admin');
-          } catch (e) {
-            console.error('Error in bootstrap super admin', e);
-          }
-        }
 
         try {
           const { data: roleData, error: roleError } = await supabase
             .from('user_roles')
-            .select('role')
+            .select('role, account_status')
             .eq('user_id', session.user.id)
             .single();
             
           if (roleData && !roleError) {
+            if (roleData.account_status && roleData.account_status !== 'active') {
+              await supabase.auth.signOut();
+              throw new Error('Esta conta está bloqueada ou desativada.');
+            }
             role = roleData.role as GlobalRole;
           }
         } catch (e) {

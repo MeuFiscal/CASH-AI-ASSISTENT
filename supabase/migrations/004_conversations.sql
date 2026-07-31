@@ -1,5 +1,5 @@
 -- 004_conversations.sql
--- Conversas (WhatsApp, Dashboard, Interações com IA)
+-- Conversas do painel e interações com a IA privada
 
 -- 1. Tabela: conversations
 CREATE TABLE conversations (

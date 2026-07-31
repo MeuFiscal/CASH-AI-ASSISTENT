@@ -4,7 +4,6 @@ import { GreetingHeader } from './components/GreetingHeader';
 import { PriorityCard } from './widgets/PriorityCard';
 import { FinancialHealthCard } from './widgets/FinancialHealthCard';
 import { AgendaOverviewCard } from './widgets/AgendaOverviewCard';
-import { WhatsAppActivityCard } from './widgets/WhatsAppActivityCard';
 import { RecentActivityCard } from './widgets/RecentActivityCard';
 import { LearningCard } from './widgets/LearningCard';
 import { MemoryCard } from './widgets/MemoryCard';
@@ -32,7 +31,6 @@ export function Dashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
             <FinancialHealthCard />
             <AgendaOverviewCard />
-            <WhatsAppActivityCard />
             <RecentActivityCard />
           </div>
 

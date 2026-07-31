@@ -1,16 +1,15 @@
 
-import { Users, Building2, Wallet, BrainCircuit, Activity, Server, MessageCircle, BarChart } from 'lucide-react';
+import { Users, Building2, Wallet, BrainCircuit, Activity, Server, BarChart } from 'lucide-react';
 
 export function KpiGrid({ metrics, loading }: { metrics: any, loading: boolean }) {
   const statCards = [
-    { title: 'Usuários Ativos', value: metrics?.users?.total || 0, trend: '+12%', icon: Users, color: 'text-[#3B82F6]' },
-    { title: 'Workspaces', value: metrics?.workspaces?.total || 0, trend: '+5%', icon: Building2, color: 'text-[#10B981]' },
-    { title: 'Assinantes Premium', value: metrics?.premium_subs || 0, trend: '+8%', icon: Activity, color: 'text-[#F59E0B]' },
-    { title: 'Receita MRR', value: `R$ ${(metrics?.mrr || 0).toLocaleString('pt-BR')}`, trend: '+15%', icon: Wallet, color: 'text-[#8B5CF6]' },
-    { title: 'Receita Total', value: `R$ ${(metrics?.revenue || 0).toLocaleString('pt-BR')}`, trend: '+20%', icon: BarChart, color: 'text-[#EC4899]' },
-    { title: 'Tokens Gemini Hoje', value: metrics?.tokens_today || 0, trend: '+2%', icon: BrainCircuit, color: 'text-[#06B6D4]' },
-    { title: 'Mensagens WhatsApp', value: metrics?.messages_today || 0, trend: '+18%', icon: MessageCircle, color: 'text-[#22C55E]' },
-    { title: 'Chamadas API Hoje', value: metrics?.api_calls || 0, trend: '+10%', icon: Server, color: 'text-[#6366F1]' }
+    { title: 'Usuários Ativos', value: metrics?.users?.total || 0, trend: '', icon: Users, color: 'text-[#3B82F6]' },
+    { title: 'Workspaces', value: metrics?.workspaces?.total || 0, trend: '', icon: Building2, color: 'text-[#10B981]' },
+    { title: 'Assinantes Premium', value: metrics?.premium_subs || 0, trend: '', icon: Activity, color: 'text-[#F59E0B]' },
+    { title: 'Receita MRR', value: `R$ ${(metrics?.mrr || 0).toLocaleString('pt-BR')}`, trend: '', icon: Wallet, color: 'text-[#8B5CF6]' },
+    { title: 'Receita Total', value: `R$ ${(metrics?.revenue || 0).toLocaleString('pt-BR')}`, trend: '', icon: BarChart, color: 'text-[#EC4899]' },
+    { title: 'Tokens IA Local Hoje', value: metrics?.tokens_today || 0, trend: '', icon: BrainCircuit, color: 'text-[#06B6D4]' },
+    { title: 'Chamadas IA Hoje', value: metrics?.api_calls || 0, trend: '', icon: Server, color: 'text-[#6366F1]' }
   ];
 
   return (

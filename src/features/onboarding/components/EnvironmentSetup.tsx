@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
   User, Database, LayoutDashboard, Calendar, 
-  Wallet, FolderOpen, BrainCircuit, MessageCircle, 
+  Wallet, FolderOpen, BrainCircuit,
   CheckCircle2, Loader2, Check
 } from 'lucide-react';
 import { cn } from '@/lib';
@@ -14,7 +14,6 @@ const SETUP_STEPS = [
   { id: 'financas', label: 'Financeiro', icon: Wallet, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
   { id: 'docs', label: 'Documentos', icon: FolderOpen, color: 'text-amber-400', bg: 'bg-amber-400/10' },
   { id: 'ai', label: 'Núcleo IA', icon: BrainCircuit, color: 'text-rose-400', bg: 'bg-rose-400/10' },
-  { id: 'wpp', label: 'WhatsApp', icon: MessageCircle, color: 'text-green-400', bg: 'bg-green-400/10' },
   { id: 'done', label: 'Finalizando', icon: CheckCircle2, color: 'text-teal-400', bg: 'bg-teal-400/10' }
 ];
 
@@ -25,7 +24,6 @@ interface EnvironmentSetupProps {
   userData: {
     name: string;
     email: string;
-    phone: string;
     password?: string;
   };
 }

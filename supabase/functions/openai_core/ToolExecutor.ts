@@ -34,8 +34,12 @@ export class ToolExecutor {
   private async createTransaction(args: any, workspaceId: string, type: 'income' | 'expense'): Promise<string> {
     const { description, amount, date, category_name, account_name } = args;
 
-    if (!description || amount === undefined) {
-      throw new Error('Description e amount são obrigatórios.');
+    if (args.confirmed !== true) {
+      return 'Confirmação necessária. Resuma descrição, valor, tipo, conta e data e peça ao usuário para confirmar explicitamente.';
+    }
+    const numericAmount = Number(amount);
+    if (!description || !Number.isFinite(numericAmount) || numericAmount <= 0) {
+      throw new Error('Descrição e valor positivo válido são obrigatórios.');
     }
 
     // 1. Obter ou Criar Conta
@@ -47,35 +51,22 @@ export class ToolExecutor {
       categoryId = await this.getOrCreateCategory(workspaceId, category_name, type);
     }
 
-    // 3. Inserir Transação
-    const transactionDate = date ? new Date(date).toISOString() : new Date().toISOString();
+    const parsedDate = date ? new Date(date) : new Date();
+    if (Number.isNaN(parsedDate.getTime())) throw new Error('Data inválida.');
 
-    const { error } = await this.supabase.from('transactions').insert({
-      workspace_id: workspaceId,
-      account_id: accountId,
-      category_id: categoryId,
-      type: type,
-      amount: amount,
-      description: description,
-      date: transactionDate,
-      status: 'completed'
+    const { error } = await this.supabase.rpc('ai_create_transaction', {
+      p_workspace_id: workspaceId,
+      p_account_id: accountId,
+      p_category_id: categoryId,
+      p_type: type,
+      p_amount: numericAmount,
+      p_description: description,
+      p_date: parsedDate.toISOString(),
+      p_idempotency_key: crypto.randomUUID(),
     });
 
     if (error) {
-      throw new Error(`Erro ao inserir transação: ${error.message}`);
-    }
-
-    // 4. Atualizar o saldo da conta (Trigger não atualiza o saldo da account automaticamente, precisamos atualizar manual ou via DB)
-    // Para simplificar, atualizamos o saldo da account via RPC ou update direto
-    const balanceModifier = type === 'income' ? amount : -amount;
-    await this.supabase.rpc('update_account_balance', { p_account_id: accountId, p_amount: balanceModifier });
-    // Se a function RPC não existir, não vai quebrar pois try catch engole o throw. Vamos fazer um update manual seguro
-    
-    // Atualização manual de saldo (evita erro se não houver RPC)
-    const { data: acc } = await this.supabase.from('accounts').select('balance').eq('id', accountId).single();
-    if (acc) {
-      const newBalance = Number(acc.balance) + Number(balanceModifier);
-      await this.supabase.from('accounts').update({ balance: newBalance }).eq('id', accountId);
+      throw new Error(`Erro ao registrar transação: ${error.message}`);
     }
 
     return `Transação registrada com sucesso: ${description} no valor de R$ ${amount}.`;

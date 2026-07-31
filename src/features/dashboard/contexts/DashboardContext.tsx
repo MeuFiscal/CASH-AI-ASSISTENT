@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { DashboardData, DashboardStateStatus } from '../types/dashboard';
 import { DashboardService } from '../services/DashboardService';
@@ -18,7 +18,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<DashboardData | null>(null);
   const [status, setStatus] = useState<DashboardStateStatus>('loading');
 
-  const loadData = async (isBackgroundRefresh = false) => {
+  const loadData = useCallback(async (isBackgroundRefresh = false) => {
     if (!user) return;
     
     if (!isBackgroundRefresh) {
@@ -58,8 +58,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         res.data.financial.balance === 0 &&
         res.data.financial.income_today === 0 &&
         res.data.financial.expense_today === 0 &&
-        res.data.agenda.length === 0 &&
-        res.data.whatsapp.length === 0;
+        res.data.agenda.length === 0;
 
       if (isEmpty) {
         res.data.status = 'empty';
@@ -71,7 +70,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         setStatus('ready');
       }
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     loadData();
@@ -86,15 +85,12 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'calendar_events' }, () => {
         loadData(true);
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'whatsapp_messages' }, () => {
-        loadData(true);
-      })
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, loadData]);
 
   return (
     <DashboardContext.Provider value={{ data, status, refreshDashboard: () => loadData() }}>

@@ -10,6 +10,7 @@ AS $$
 DECLARE
     result json;
 BEGIN
+    IF NOT public.admin_check_access() THEN RAISE EXCEPTION 'Acesso negado'; END IF;
     SELECT json_agg(row_to_json(t)) INTO result
     FROM (
         SELECT 
@@ -36,17 +37,16 @@ AS $$
 DECLARE
     result json;
 BEGIN
-    -- This relies on audit_logs. If you don't have it, we use a basic mock based on auth.users for safety in MVP
-    -- In a real scenario, this would query a unified event stream or audit_logs table.
+    IF NOT public.admin_check_access() THEN RAISE EXCEPTION 'Acesso negado'; END IF;
     SELECT json_agg(row_to_json(t)) INTO result
     FROM (
         SELECT 
             id::text, 
-            'user_joined' as type, 
-            'Novo Usuário' as title, 
-            email as description, 
+            action as type,
+            resource_type as title,
+            COALESCE(details::text, action) as description,
             created_at as date
-        FROM auth.users
+        FROM public.audit_logs
         ORDER BY created_at DESC
         LIMIT p_limit
     ) t;
@@ -65,6 +65,7 @@ DECLARE
     result json;
     v_days INT;
 BEGIN
+    IF NOT public.admin_check_access() THEN RAISE EXCEPTION 'Acesso negado'; END IF;
     IF p_period = '7d' THEN v_days := 7;
     ELSIF p_period = '30d' THEN v_days := 30;
     ELSIF p_period = '90d' THEN v_days := 90;

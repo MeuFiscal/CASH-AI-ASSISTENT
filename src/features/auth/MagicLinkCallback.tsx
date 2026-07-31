@@ -39,10 +39,10 @@ export function MagicLinkCallback() {
           </div>
           <h2 className="text-2xl font-bold text-white mb-3">Link Expirado</h2>
           <p className="text-[#A8B3CF] text-[15px] mb-8 leading-relaxed">
-            Este acesso expirou por segurança. Peça um novo acesso no seu WhatsApp para continuar utilizando seu Centro de Inteligência.
+            Este acesso expirou por segurança. Solicite um novo link na tela de login.
           </p>
           <button 
-            onClick={() => window.location.href = 'https://wa.me/seunumerodowhatsapp'} // Opcional: link direto
+            onClick={() => navigate('/auth/login')}
             className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 hover:bg-[#3B82F6]/20 transition-all font-bold text-[#3B82F6]"
           >
             Solicitar novo acesso

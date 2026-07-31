@@ -59,13 +59,6 @@ BEGIN
                 ORDER BY s.created_at DESC LIMIT 1
             ) as plan_name,
             (
-                SELECT wa.status
-                FROM public.workspace_members wm
-                JOIN public.whatsapp_accounts wa ON wa.workspace_id = wm.workspace_id
-                WHERE wm.user_id = u.id
-                ORDER BY wa.created_at DESC LIMIT 1
-            ) as whatsapp_status,
-            (
                 SELECT w.name
                 FROM public.workspace_members wm
                 JOIN public.workspaces w ON w.id = wm.workspace_id
@@ -159,14 +152,6 @@ BEGIN
             FROM public.workspace_members wm
             JOIN public.subscriptions s ON s.workspace_id = wm.workspace_id
             JOIN public.plans p ON p.id = s.plan_id
-            WHERE wm.user_id = p_user_id
-        ),
-        'whatsapp_accounts', (
-            SELECT COALESCE(jsonb_agg(
-                jsonb_build_object('id', wa.id, 'phone_number', wa.phone_number, 'status', wa.status)
-            ), '[]'::jsonb)
-            FROM public.workspace_members wm
-            JOIN public.whatsapp_accounts wa ON wa.workspace_id = wm.workspace_id
             WHERE wm.user_id = p_user_id
         ),
         'usage', (

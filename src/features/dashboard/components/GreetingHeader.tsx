@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { DollarSign, ArrowDown, ArrowUp, Calendar, MessageCircle, FileText, Brain } from 'lucide-react';
+import { DollarSign, ArrowDown, ArrowUp, Calendar, FileText, Brain } from 'lucide-react';
 import { useDashboard } from '../hooks/useDashboard';
 
 export function GreetingHeader() {
@@ -56,7 +56,6 @@ export function GreetingHeader() {
 
   const financial = data?.financial || { balance: 0, income_today: 0, expense_today: 0 };
   const agendaCount = data?.agenda?.length || 0;
-  const msgCount = data?.whatsapp?.length || 0;
 
   return (
     <header className="w-full flex flex-col gap-5 mb-2 animate-in fade-in slide-in-from-top-4 duration-1000">
@@ -87,7 +86,7 @@ export function GreetingHeader() {
         <Brain className="w-5 h-5 text-[#10B981] shrink-0 mt-0.5" />
         <p className="text-[15px] text-[#E2E8F0] font-medium tracking-wide leading-relaxed flex-1">
           {status === 'empty' ? 
-            'Seu Assistente está pronto. Envie sua primeira mensagem pelo WhatsApp para começar a organizar sua vida.' : 
+            'Seu assistente está pronto. Abra o chat para começar a organizar sua vida.' :
             'Hoje sua agenda está equilibrada e seu fluxo financeiro continua saudável.'}
         </p>
       </div>
@@ -136,17 +135,6 @@ export function GreetingHeader() {
           <div className="flex flex-col items-start">
             <span className="text-[11px] font-bold text-[#A8B3CF] uppercase tracking-wider">Hoje</span>
             <span className="text-[14px] font-bold text-white">{agendaCount} comps.</span>
-          </div>
-        </button>
-
-        {/* WhatsApp */}
-        <button className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#181C28]/60 border border-white/5 backdrop-blur-xl hover:bg-white/5 transition-all group shrink-0 min-w-[140px]">
-          <div className="w-8 h-8 rounded-full bg-[#10B981]/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-            <MessageCircle className="w-4 h-4 text-[#10B981]" />
-          </div>
-          <div className="flex flex-col items-start">
-            <span className="text-[11px] font-bold text-[#A8B3CF] uppercase tracking-wider">WhatsApp</span>
-            <span className="text-[14px] font-bold text-white">{msgCount} msgs</span>
           </div>
         </button>
 

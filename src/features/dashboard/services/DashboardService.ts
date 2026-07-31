@@ -17,39 +17,46 @@ export class DashboardService {
         return { data: null, error: new Error(error.message) };
       }
 
-      // Buscar transações reais para cobrir os mocks do RPC atual
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
 
-      const { data: transactions } = await supabase
+      const [{ data: transactions, error: transactionsError }, { data: accounts, error: accountsError }] = await Promise.all([
+        supabase
         .from('transactions')
-        .select('amount, type, date')
-        .eq('workspace_id', workspaceId);
+        .select('amount, type, date, status')
+        .eq('workspace_id', workspaceId)
+        .eq('status', 'completed'),
+        supabase.from('accounts').select('balance').eq('workspace_id', workspaceId),
+      ]);
 
-      let realBalance = 0;
+      if (transactionsError || accountsError) {
+        return { data: null, error: new Error(transactionsError?.message || accountsError?.message || 'Falha ao carregar finanças') };
+      }
+
+      const realBalance = (accounts || []).reduce((total, account) => total + Number(account.balance), 0);
       let incomeToday = 0;
       let expenseToday = 0;
 
       if (transactions) {
         transactions.forEach(tx => {
           if (tx.type === 'income') {
-            realBalance += Number(tx.amount);
             if (new Date(tx.date) >= todayStart) incomeToday += Number(tx.amount);
           } else {
-            realBalance -= Number(tx.amount);
             if (new Date(tx.date) >= todayStart) expenseToday += Number(tx.amount);
           }
         });
       }
 
       // Buscar agenda atualizada
-      const { data: agenda } = await supabase
+      const { data: agenda, error: agendaError } = await supabase
         .from('calendar_events')
         .select('id, title, start_time')
         .eq('workspace_id', workspaceId)
         .gte('start_time', todayStart.toISOString())
         .order('start_time', { ascending: true })
         .limit(5);
+
+      if (agendaError) return { data: null, error: new Error(agendaError.message) };
 
       const dashboardData: DashboardData = {
         status: 'ready',
@@ -61,7 +68,6 @@ export class DashboardService {
         },
         agenda: agenda ? agenda.map(a => ({ id: a.id, title: a.title, time: a.start_time })) : [],
         priorities: data.priorities || [],
-        whatsapp: data.whatsapp || [],
         memory: data.memory || {},
         insights: data.insights || {},
         documents: data.documents || {},

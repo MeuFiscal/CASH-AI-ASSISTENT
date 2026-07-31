@@ -254,14 +254,7 @@ export const router = createBrowserRouter([
         }
       },
       {
-        path: 'whatsapp',
-        lazy: async () => {
-          const { AdminWhatsApp } = await import('@/features/admin/pages/whatsapp');
-          return { Component: AdminWhatsApp };
-        }
-      },
-      {
-        path: 'openai',
+        path: 'ai',
         lazy: async () => {
           const { AdminOpenAI } = await import('@/features/admin/pages/openai');
           return { Component: AdminOpenAI };

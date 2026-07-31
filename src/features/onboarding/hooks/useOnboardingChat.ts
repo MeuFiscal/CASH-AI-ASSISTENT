@@ -8,8 +8,6 @@ export type OnboardingPhase =
   | 'wait-name'
   | 'ask-email'
   | 'wait-email'
-  | 'ask-phone'
-  | 'wait-phone'
   | 'ask-password'
   | 'wait-password'
   | 'ask-confirm-password'
@@ -18,8 +16,6 @@ export type OnboardingPhase =
   | 'wait-objective'
   | 'ask-platform'
   | 'wait-platform'
-  | 'ask-notifications'
-  | 'wait-notifications'
   | 'ask-summary'
   | 'wait-summary'
   | 'setup' // Show EnvironmentSetup
@@ -28,11 +24,9 @@ export type OnboardingPhase =
 interface OnboardingData {
   name: string;
   email: string;
-  phone: string;
   password?: string;
   objective: string;
   platform: string;
-  notifications: boolean;
   dailySummary: boolean;
 }
 
@@ -108,13 +102,6 @@ export function useOnboardingChat() {
     else if (phase === 'wait-email') {
       addUserMessage(input);
       setUserData(prev => ({ ...prev, email: input }));
-      setPhase('ask-phone');
-      await addAiMessage('Qual número de WhatsApp você utilizará?', 800);
-      setPhase('wait-phone');
-    }
-    else if (phase === 'wait-phone') {
-      addUserMessage(input);
-      setUserData(prev => ({ ...prev, phone: input }));
       setPhase('ask-password');
       await addAiMessage('Agora escolha uma senha segura.', 800);
       setPhase('wait-password');
@@ -150,14 +137,8 @@ export function useOnboardingChat() {
     }
     else if (phase === 'wait-platform') {
       setUserData(prev => ({ ...prev, platform: value }));
-      setPhase('ask-notifications');
-      await addAiMessage('Deseja receber lembretes pelo WhatsApp?', 800);
-      setPhase('wait-notifications');
-    }
-    else if (phase === 'wait-notifications') {
-      setUserData(prev => ({ ...prev, notifications: value === 'yes' }));
       setPhase('ask-summary');
-      await addAiMessage('Deseja receber um resumo diário das suas atividades?', 800);
+      await addAiMessage('Deseja ver um resumo diário das suas atividades no painel?', 800);
       setPhase('wait-summary');
     }
     else if (phase === 'wait-summary') {

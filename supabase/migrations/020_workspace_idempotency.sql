@@ -34,7 +34,6 @@ BEGIN
             UPDATE public.conversations SET workspace_id = v_oldest_workspace WHERE workspace_id = v_dup_workspace;
             UPDATE public.accounts SET workspace_id = v_oldest_workspace WHERE workspace_id = v_dup_workspace;
             UPDATE public.transactions SET workspace_id = v_oldest_workspace WHERE workspace_id = v_dup_workspace;
-            UPDATE public.whatsapp_contacts SET workspace_id = v_oldest_workspace WHERE workspace_id = v_dup_workspace;
             UPDATE public.documents SET workspace_id = v_oldest_workspace WHERE workspace_id = v_dup_workspace;
             
             -- Para tabelas 1-para-1 ou relacionamentos que podem conflitar, o ON DELETE CASCADE cuidará.
@@ -87,8 +86,6 @@ BEGIN
             VALUES (v_workspace_id, v_plan_id, 'TRIALING');
         END IF;
 
-        -- Se tiver telefone no meta_data, pode inserir no whatsapp_contacts opcionalmente...
-        -- (Mantendo simples conforme arquitetura backend)
     END IF;
 
     RETURN NEW;

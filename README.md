@@ -1,32 +1,53 @@
-# React + TypeScript + Vite
+# CASH AI ASSISTENT
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Aplicação React/TypeScript com Supabase e um núcleo de IA executado em infraestrutura privada.
 
-Currently, two official plugins are available:
+## Segurança e isolamento
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Cada registro de domínio pertence a um `workspace_id`.
+- O Supabase aplica RLS e valida a sessão em todas as consultas do usuário.
+- Um usuário não pode se associar diretamente ao workspace de terceiros.
+- Funções administrativas exigem papel global ativo de administrador.
+- O primeiro superadministrador deve ser provisionado manualmente por `service_role`; não existe bootstrap público.
+- Histórico da IA é carregado pelo backend. O histórico enviado pelo navegador é ignorado.
+- Operações financeiras da IA exigem confirmação e são executadas por uma função transacional.
 
-## React Compiler
+## IA local
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+O núcleo usa um servidor compatível com `POST /v1/chat/completions`, como Ollama ou llama.cpp. Não há dependência de Gemini, OpenAI ou outra IA paga.
 
-## Expanding the Oxlint configuration
+Variáveis da Edge Function:
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```text
+LOCAL_AI_BASE_URL=http://host.docker.internal:11434
+LOCAL_AI_MODEL=qwen3:14b
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+O servidor de IA precisa estar acessível a partir do ambiente onde a Edge Function roda. Em produção, execute o modelo na mesma rede privada do backend; um Supabase hospedado não consegue acessar o `localhost` do computador do usuário.
+
+Exemplo com Ollama:
+
+```bash
+ollama serve
+ollama pull qwen3:14b
+```
+
+## Desenvolvimento
+
+```bash
+npm install
+npm run dev
+```
+
+Verificações:
+
+```bash
+npm run lint
+npm run build
+```
+
+## Banco
+
+As migrations ficam em `supabase/migrations`. A migration `024_security_local_ai_cleanup.sql` endurece o isolamento, remove estruturas descontinuadas e cria a operação financeira atômica.
+
+Antes de aplicar em um banco com dados reais, faça backup e valide em staging. A migration de limpeza remove definitivamente as tabelas da funcionalidade descontinuada.

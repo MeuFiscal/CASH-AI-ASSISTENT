@@ -26,27 +26,6 @@ export function Superpowers() {
 
         <PageSection title="Conexões Disponíveis">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* WhatsApp */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#10B981]/10 to-transparent border border-[#10B981]/20 backdrop-blur-xl relative overflow-hidden group flex flex-col h-full">
-            <div className="absolute top-0 right-0 p-4">
-              <div className="px-3 py-1 rounded-full bg-[#10B981]/20 border border-[#10B981]/30 text-[#10B981] text-[11px] font-bold tracking-widest uppercase">
-                Conectado
-              </div>
-            </div>
-            
-            <h2 className="text-2xl font-bold text-white tracking-tight mb-2">WhatsApp</h2>
-            <p className="text-[#A8B3CF] text-[15px] leading-relaxed mb-6 font-medium">
-              Registre gastos.<br />
-              Crie compromissos.<br />
-              Converse naturalmente.
-            </p>
-            <div className="mt-auto">
-              <button onClick={handlePremiumClick} className="w-full sm:w-auto px-6 py-3 rounded-full bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 transition-colors">
-                Gerenciar Conexão
-              </button>
-            </div>
-          </div>
-
           {/* Google Agenda */}
           <div className="p-6 sm:p-8 rounded-3xl bg-[#181C28]/60 border border-white/5 backdrop-blur-xl relative overflow-hidden group hover:bg-[#181C28]/80 transition-colors flex flex-col h-full">
             <div className="flex items-center gap-3 mb-2">

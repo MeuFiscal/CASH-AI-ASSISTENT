@@ -29,8 +29,8 @@ export function ResetPassword() {
     e.preventDefault();
     setError(null);
     
-    if (password.length < 6) {
-      setError('A nova senha deve ter no mínimo 6 caracteres.');
+    if (password.length < 10) {
+      setError('A nova senha deve ter no mínimo 10 caracteres.');
       return;
     }
     if (password !== confirmPassword) {
@@ -93,7 +93,7 @@ export function ResetPassword() {
               type="password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Mínimo de 6 caracteres"
+              placeholder="Mínimo de 10 caracteres"
               className="w-full bg-[#0B1221]/50 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-[14px] text-white placeholder:text-[#7B879D] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 focus:border-[#3B82F6] transition-all"
               required
             />

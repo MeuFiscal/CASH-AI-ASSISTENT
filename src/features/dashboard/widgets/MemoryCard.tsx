@@ -22,7 +22,7 @@ export function MemoryCard() {
         </div>
         <h3 className="text-[15px] font-semibold text-white mb-2">Construindo Memória</h3>
         <p className="text-[13px] text-[#A8B3CF] leading-relaxed max-w-[250px]">
-          Ainda estou conhecendo seus hábitos. Quanto mais conversarmos pelo WhatsApp, mais inteligente ficarei.
+          Ainda estou conhecendo seus hábitos. Quanto mais conversarmos no chat, mais contexto útil conseguirei organizar.
         </p>
       </div>
     </DashboardCard>

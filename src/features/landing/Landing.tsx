@@ -15,9 +15,7 @@ import { ROUTES } from '@/constants';
 
 import {
   HeroInteligente,
-  PremiumBackground,
-  WhatsAppShowcase,
-  AgendaShowcase
+  PremiumBackground
 } from './components';
 import { OnboardingFlow } from '@/features/onboarding/components/OnboardingFlow';
 
@@ -77,22 +75,6 @@ export function Landing() {
           isOnboarding ? "opacity-0 absolute scale-95 pointer-events-none" : "opacity-100 scale-100 relative z-10 mb-20"
         )}>
           <HeroInteligente />
-        </div>
-
-        {/* ── WhatsApp Showcase Section ── */}
-        <div className={cn(
-          "w-full max-w-6xl flex justify-center transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)] order-2 mb-24",
-          isOnboarding ? "opacity-0 absolute translate-y-12 pointer-events-none" : "opacity-100 translate-y-0 relative z-10"
-        )}>
-          <WhatsAppShowcase />
-        </div>
-
-        {/* ── Agenda Showcase Section ── */}
-        <div className={cn(
-          "w-full max-w-6xl flex justify-center transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)] order-3 mb-24",
-          isOnboarding ? "opacity-0 absolute translate-y-12 pointer-events-none" : "opacity-100 translate-y-0 relative z-10"
-        )}>
-          <AgendaShowcase />
         </div>
 
         {/* ── Sales Pitch ── */}

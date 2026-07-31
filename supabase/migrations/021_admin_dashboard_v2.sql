@@ -26,10 +26,10 @@ DECLARE
     v_total_mrr DECIMAL(10,2);
     v_total_revenue DECIMAL(10,2);
     v_tokens_today INT;
-    v_messages_today INT;
     v_api_calls_today INT;
     v_active_premium INT;
 BEGIN
+    IF NOT public.admin_check_access() THEN RAISE EXCEPTION 'Acesso negado'; END IF;
     SELECT COUNT(*) INTO v_total_users FROM auth.users;
     SELECT COUNT(*) INTO v_users_today FROM auth.users WHERE created_at >= CURRENT_DATE;
     
@@ -41,12 +41,13 @@ BEGIN
     JOIN public.plans p ON s.plan_id = p.id
     WHERE s.status IN ('ACTIVE', 'TRIALING');
     
-    SELECT COALESCE(SUM(amount), 0) INTO v_total_revenue FROM public.transactions WHERE type = 'INCOME';
+    SELECT COALESCE(SUM(amount), 0) INTO v_total_revenue FROM public.transactions WHERE type = 'income';
     
     SELECT COUNT(*) INTO v_active_premium FROM public.subscriptions s JOIN public.plans p ON s.plan_id = p.id WHERE s.status = 'ACTIVE' AND p.price > 0;
     
-    SELECT COALESCE(SUM((metadata->'tokens'->>'total')::numeric), 0) INTO v_tokens_today FROM public.whatsapp_messages WHERE created_at >= CURRENT_DATE;
-    SELECT COUNT(*) INTO v_messages_today FROM public.whatsapp_messages WHERE created_at >= CURRENT_DATE;
+    SELECT COALESCE(SUM((metadata->'tokens'->>'total')::numeric), 0)
+    INTO v_tokens_today FROM public.messages
+    WHERE role = 'assistant' AND created_at >= CURRENT_DATE;
     
     v_api_calls_today := 0;
 
@@ -57,7 +58,6 @@ BEGIN
         'mrr', v_total_mrr,
         'revenue', v_total_revenue,
         'tokens_today', v_tokens_today,
-        'messages_today', v_messages_today,
         'api_calls', v_api_calls_today
     );
 END;
@@ -78,6 +78,7 @@ DECLARE
     v_arpu DECIMAL(10,2) := 0;
     v_active_paid INT;
 BEGIN
+    IF NOT public.admin_check_access() THEN RAISE EXCEPTION 'Acesso negado'; END IF;
     SELECT COALESCE(SUM(p.price), 0) INTO v_mrr FROM public.subscriptions s JOIN public.plans p ON s.plan_id = p.id WHERE s.status = 'ACTIVE';
     v_arr := v_mrr * 12;
     SELECT COUNT(*) INTO v_active_paid FROM public.subscriptions s JOIN public.plans p ON s.plan_id = p.id WHERE s.status = 'ACTIVE' AND p.price > 0;
@@ -108,6 +109,7 @@ DECLARE
     v_paid INT;
     v_canceled INT;
 BEGIN
+    IF NOT public.admin_check_access() THEN RAISE EXCEPTION 'Acesso negado'; END IF;
     SELECT COUNT(*) INTO v_trial FROM public.subscriptions WHERE status = 'TRIALING';
     SELECT COUNT(*) INTO v_paid FROM public.subscriptions s JOIN public.plans p ON s.plan_id = p.id WHERE s.status = 'ACTIVE' AND p.price > 0;
     SELECT COUNT(*) INTO v_canceled FROM public.subscriptions WHERE status = 'CANCELED';
@@ -120,36 +122,7 @@ BEGIN
 END;
 $$;
 
--- 6. Função: admin_get_whatsapp_metrics()
-CREATE OR REPLACE FUNCTION public.admin_get_whatsapp_metrics()
-RETURNS json
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-DECLARE
-    v_sent INT;
-    v_received INT;
-    v_active_conversations INT;
-    v_webhooks INT;
-    v_numbers_connected INT;
-BEGIN
-    SELECT COUNT(*) INTO v_sent FROM public.whatsapp_messages WHERE direction = 'outbound';
-    SELECT COUNT(*) INTO v_received FROM public.whatsapp_messages WHERE direction = 'inbound';
-    SELECT COUNT(*) INTO v_active_conversations FROM public.conversations WHERE status = 'open';
-    v_webhooks := 0; -- mock until webhook table exists
-    SELECT COUNT(*) INTO v_numbers_connected FROM public.whatsapp_instances WHERE status = 'connected';
-    
-    RETURN json_build_object(
-        'sent', v_sent,
-        'received', v_received,
-        'active_conversations', v_active_conversations,
-        'webhooks', v_webhooks,
-        'numbers_connected', v_numbers_connected
-    );
-END;
-$$;
-
--- 7. Função: admin_get_top_workspaces()
+-- 6. Função: admin_get_top_workspaces()
 CREATE OR REPLACE FUNCTION public.admin_get_top_workspaces()
 RETURNS json
 LANGUAGE plpgsql
@@ -158,12 +131,12 @@ AS $$
 DECLARE
     result json;
 BEGIN
+    IF NOT public.admin_check_access() THEN RAISE EXCEPTION 'Acesso negado'; END IF;
     SELECT json_agg(row_to_json(t)) INTO result
     FROM (
         SELECT w.id, w.name AS empresa, p.name AS plano, 
                (SELECT COUNT(*) FROM public.workspace_members wm WHERE wm.workspace_id = w.id) AS usuarios,
-               (SELECT COUNT(*) FROM public.whatsapp_messages msg WHERE msg.workspace_id = w.id) AS mensagens,
-               COALESCE((SELECT SUM((metadata->'tokens'->>'total')::numeric) FROM public.whatsapp_messages m WHERE m.workspace_id = w.id), 0) AS tokens,
+               COALESCE((SELECT SUM((metadata->'tokens'->>'total')::numeric) FROM public.messages m WHERE m.workspace_id = w.id AND m.role = 'assistant'), 0) AS tokens,
                (SELECT COALESCE(SUM(amount), 0) FROM public.transactions tr WHERE tr.workspace_id = w.id) AS receita,
                w.updated_at AS ultimo_acesso,
                'Ativo' as status
@@ -187,6 +160,7 @@ AS $$
 DECLARE
     result json;
 BEGIN
+    IF NOT public.admin_check_access() THEN RAISE EXCEPTION 'Acesso negado'; END IF;
     -- This is a foundational example. A true implementation would query distinct alerting scenarios.
     SELECT json_agg(row_to_json(t)) INTO result
     FROM (

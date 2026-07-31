@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { Bell, AlertTriangle, Info, CheckCircle2, CheckCircle, Trash2 } from 'lucide-react';
 import { cn } from '@/lib';
@@ -22,11 +22,7 @@ export function Notifications() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadNotifications();
-  }, [user]);
-
-  async function loadNotifications() {
+  const loadNotifications = useCallback(async () => {
     if (!user?.id) return;
     const { data: ws } = await supabase
       .from('workspace_members')
@@ -44,7 +40,11 @@ export function Notifications() {
 
     setNotifications(notifs || []);
     setLoading(false);
-  }
+  }, [user]);
+
+  useEffect(() => {
+    loadNotifications();
+  }, [loadNotifications]);
 
   const markAsRead = async (id: string) => {
     await supabase.from('notifications').update({ read_at: new Date().toISOString() }).eq('id', id);

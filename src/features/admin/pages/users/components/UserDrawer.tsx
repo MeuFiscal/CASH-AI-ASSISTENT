@@ -99,7 +99,7 @@ export function UserDrawer({ userId, onClose }: UserDrawerProps) {
                       <div className="bg-[#181C28]/60 rounded-xl p-4 border border-white/5 flex gap-3 items-center">
                         <Zap className="w-5 h-5 text-purple-400" />
                         <div className="flex flex-col">
-                          <span className="text-xs text-[#A8B3CF]">Tokens OpenAI</span>
+                          <span className="text-xs text-[#A8B3CF]">Tokens da IA local</span>
                           <span className="text-lg font-bold text-white">{data.usage?.ai_tokens || 0}</span>
                         </div>
                       </div>

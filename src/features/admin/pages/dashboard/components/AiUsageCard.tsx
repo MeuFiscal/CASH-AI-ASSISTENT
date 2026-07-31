@@ -5,7 +5,7 @@ export function AiUsageCard({ stats, loading }: { stats: any, loading: boolean }
     <div className="bg-[#181C28]/60 border border-white/5 backdrop-blur-md rounded-2xl p-5 w-full flex flex-col gap-4 animate-in fade-in duration-500">
       <div className="flex items-center gap-2">
         <BrainCircuit className="w-5 h-5 text-[#8B5CF6]" />
-        <h3 className="text-white font-medium">Uso da IA (Gemini)</h3>
+        <h3 className="text-white font-medium">Uso da IA local</h3>
       </div>
 
       <div className="flex flex-col gap-4 mt-2">
@@ -30,7 +30,7 @@ export function AiUsageCard({ stats, loading }: { stats: any, loading: boolean }
 
         <div className="mt-2">
           <div className="flex justify-between text-xs mb-1.5">
-            <span className="text-[#A8B3CF]">Cota Diária (Gemini 2.0)</span>
+            <span className="text-[#A8B3CF]">Processamento diário</span>
             <span className="text-white font-medium">65%</span>
           </div>
           <div className="w-full bg-[#0A0D14] rounded-full h-2 overflow-hidden border border-white/5">

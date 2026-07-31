@@ -14,7 +14,7 @@ export function MyAI() {
   
   const [settings, setSettings] = useState({
     tone: 'Casual',
-    model: 'gemini-2.0-flash',
+    model: 'qwen3:14b',
     language: 'pt-BR',
     personality: 'Trabalho',
     shortAnswers: false,
@@ -46,7 +46,7 @@ export function MyAI() {
             setSettings(prev => ({
               ...prev,
               tone: aiData.tone || 'Casual',
-              model: aiData.model || 'gemini-2.0-flash',
+              model: aiData.model || 'qwen3:14b',
               language: aiData.language || 'pt-BR',
               personality: aiData.personality || 'Trabalho'
             }));
@@ -55,7 +55,7 @@ export function MyAI() {
             await supabase.from('workspace_ai').insert({
               workspace_id: ws.workspace_id,
               tone: 'Casual',
-              model: 'gemini-2.0-flash',
+              model: 'qwen3:14b',
               language: 'pt-BR',
               personality: 'Assistente Executivo'
             });
@@ -90,7 +90,7 @@ export function MyAI() {
         }, { onConflict: 'workspace_id,key' });
 
       alert('Configurações da IA salvas com sucesso!');
-    } catch (err) {
+    } catch {
       alert('Erro ao salvar configurações.');
     } finally {
       setSaving(false);
@@ -170,7 +170,7 @@ export function MyAI() {
           <PageSection title="Modelo de Inteligência">
           <div className="flex flex-col gap-5 p-6 sm:p-8 rounded-3xl bg-[#181C28]/60 border border-white/5 backdrop-blur-xl">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {['gemini-2.0-flash', 'gemini-2.0-flash-lite'].map((option) => (
+              {['qwen3:14b', 'llama3.3:70b'].map((option) => (
                 <button 
                   key={option}
                   onClick={() => updateSetting('model', option)}

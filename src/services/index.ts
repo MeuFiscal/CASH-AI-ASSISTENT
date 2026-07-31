@@ -6,7 +6,7 @@
  * que idealmente rodará em Edge Functions / Backend.
  */
 
-// 1. WhatsApp Reception
+// 1. Entrada de eventos internos
 export interface ReceiverService {
   processIncomingWebhook(payload: any): Promise<void>;
 }

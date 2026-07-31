@@ -12,8 +12,7 @@ interface ServiceHealth {
 export function SystemHealthPanel({ loading }: { loading: boolean }) {
   const services: ServiceHealth[] = [
     { name: 'Supabase', status: 'online', latency: 45, lastCheck: 'agora', icon: Database },
-    { name: 'Gemini API', status: 'online', latency: 248, lastCheck: 'agora', icon: BrainCircuit },
-    { name: 'WhatsApp API', status: 'online', latency: 120, lastCheck: 'agora', icon: MessageCircle },
+    { name: 'IA Local', status: 'online', latency: 248, lastCheck: 'agora', icon: BrainCircuit },
     { name: 'Stripe', status: 'online', latency: 85, lastCheck: 'agora', icon: CreditCard },
     { name: 'Vercel Edge', status: 'online', latency: 32, lastCheck: 'agora', icon: Zap },
     { name: 'Storage', status: 'online', latency: 55, lastCheck: 'agora', icon: HardDrive },
@@ -58,4 +57,4 @@ export function SystemHealthPanel({ loading }: { loading: boolean }) {
 }
 
 // Temporary imports since lucide-react doesn't export them all in the snippet
-import { BrainCircuit, MessageCircle, CreditCard } from 'lucide-react';
+import { BrainCircuit, CreditCard } from 'lucide-react';

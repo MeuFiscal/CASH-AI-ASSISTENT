@@ -1,11 +1,10 @@
 
-import { Plus, Users, MessageSquare, CreditCard, Database, ShieldAlert } from 'lucide-react';
+import { Plus, Users, CreditCard, Database, ShieldAlert } from 'lucide-react';
 
 export function DashboardHero() {
   const actions = [
     { label: 'Novo Workspace', icon: Plus, onClick: () => {} },
     { label: 'Novo Usuário', icon: Users, onClick: () => {} },
-    { label: 'Conectar WhatsApp', icon: MessageSquare, onClick: () => {} },
     { label: 'Adicionar Crédito', icon: CreditCard, onClick: () => {} },
     { label: 'Abrir Logs', icon: Database, onClick: () => {} },
     { label: 'Ver Auditoria', icon: ShieldAlert, onClick: () => {} },

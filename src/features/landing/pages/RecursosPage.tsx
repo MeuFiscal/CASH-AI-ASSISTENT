@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Zap, MessageCircle, BarChart3, Calendar, Shield, Brain } from 'lucide-react';
+import { ArrowLeft, Zap, Database, BarChart3, Calendar, Shield, Brain } from 'lucide-react';
 import { ROUTES } from '@/constants';
 import { PremiumBackground } from '../components/PremiumBackground';
 
 const features = [
   { icon: Zap, title: "Categorização Imediata", desc: "A IA entende o contexto e classifica gastos automaticamente." },
-  { icon: MessageCircle, title: "Gestão pelo WhatsApp", desc: "Mande áudios ou textos naturais e deixe a IA fazer o trabalho duro." },
+  { icon: Database, title: "Memória Privada", desc: "Contexto e histórico isolados por usuário, sempre consultados com segurança." },
   { icon: BarChart3, title: "Dashboards Inteligentes", desc: "Acompanhe para onde seu dinheiro vai com gráficos lindos." },
   { icon: Calendar, title: "Agenda Sincronizada", desc: "Integração total com o Google Agenda para lembretes de contas." },
   { icon: Shield, title: "Segurança de Dados", desc: "Criptografia de ponta a ponta garantindo que seus dados são seus." },

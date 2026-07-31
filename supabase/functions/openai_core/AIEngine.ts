@@ -2,7 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.42.0';
 import { AIContextPayload } from './types.ts';
 import { buildSystemPrompt } from './PromptManager.ts';
 import { getTools } from './ToolRegistry.ts';
-import { GeminiService } from './GeminiService.ts';
+import { LocalAIService } from './LocalAIService.ts';
 import { ToolExecutor } from './ToolExecutor.ts';
 
 export class AIEngine {
@@ -19,7 +19,7 @@ export class AIEngine {
   }
 
   async run(payload: AIContextPayload) {
-    const { workspace_id, message, history = [], source = 'chat', user_id, channel = 'web', contact_id } = payload;
+    const { workspace_id, message, source = 'chat', user_id } = payload;
     let { conversation_id } = payload;
 
     // 1. Buscar Contexto do Workspace
@@ -34,26 +34,22 @@ export class AIEngine {
       throw new Error('Workspace não encontrado ou acesso negado.');
     }
 
-    let conversationHistory = [...history];
+    let conversationHistory: Array<{ role: string; content: string }> = [];
 
-    if (channel === 'whatsapp' && contact_id) {
-      // Para WhatsApp: Busca o histórico diretamente da whatsapp_messages
-      const { data: waHistory } = await this.supabase
-        .from('whatsapp_messages')
-        .select('direction, content')
-        .eq('contact_id', contact_id)
-        .order('created_at', { ascending: false })
-        .limit(10);
-        
-      if (waHistory) {
-        const sorted = waHistory.reverse();
-        conversationHistory = sorted.map(m => ({
-          role: m.direction === 'inbound' ? 'user' : 'assistant',
-          content: m.content || ''
-        }));
-      }
-    } else {
-      // Lógica do Web Chat (cria conversa e salva msg do usuário)
+    // O histórico confiável é sempre carregado do banco, nunca aceito do navegador.
+    if (conversation_id) {
+      const { data: storedHistory, error: historyError } = await this.supabase
+        .from('messages')
+        .select('role, content')
+        .eq('conversation_id', conversation_id)
+        .eq('workspace_id', workspace_id)
+        .order('created_at', { ascending: true })
+        .limit(30);
+      if (historyError) throw new Error('Não foi possível carregar o histórico da conversa.');
+      conversationHistory = storedHistory || [];
+    }
+
+    {
       if (!conversation_id) {
         const { data: conv } = await this.supabase
           .from('conversations')
@@ -64,7 +60,7 @@ export class AIEngine {
       }
 
       if (conversation_id) {
-        await this.supabase.from('messages').insert({
+        const { error: messageError } = await this.supabase.from('messages').insert({
           conversation_id,
           workspace_id,
           sender_id: user_id,
@@ -72,9 +68,9 @@ export class AIEngine {
           role: 'user',
           content: message
         });
+        if (messageError) throw new Error('Não foi possível salvar sua mensagem.');
       }
       
-      // Anexa a nova mensagem do usuário no histórico que veio no payload
       conversationHistory.push({ role: 'user', content: message });
     }
 
@@ -108,7 +104,6 @@ export class AIEngine {
       wsData,
       memories || [],
       aiData?.base_prompt || '',
-      channel
     );
     
     // Injetar Aprendizados Contínuos
@@ -145,23 +140,12 @@ export class AIEngine {
     // 5. Preparar Ferramentas
     const tools = getTools();
 
-    // 6. Processar no Gemini
-    const geminiService = new GeminiService();
-    
-    // Mapear modelo do usuário para Gemini (usando gemini-flash-latest ativo)
-    const modelMap: Record<string, string> = {
-      'gpt-4o': 'gemini-flash-latest',
-      'gpt-4-turbo': 'gemini-flash-latest',
-      'gpt-4-turbo-preview': 'gemini-flash-latest',
-      'gpt-3.5-turbo': 'gemini-flash-latest',
-      'gemini-2.0-flash': 'gemini-flash-latest',
-      'gemini-2.0-flash-lite': 'gemini-flash-latest',
-    };
-    const requestedModel = aiData?.model || 'gemini-flash-latest';
-    const model = modelMap[requestedModel] || 'gemini-flash-latest';
-    const temperature = aiData?.temperature !== undefined ? aiData.temperature : 0.7;
+    // 6. Processar no servidor privado de IA local
+    const localAI = new LocalAIService();
+    const model = Deno.env.get('LOCAL_AI_MODEL') || aiData?.model || 'qwen3:14b';
+    const temperature = aiData?.temperature !== undefined ? Math.min(aiData.temperature, 0.5) : 0.3;
 
-    let aiResponse = await geminiService.processMessage(
+    let aiResponse = await localAI.processMessage(
       systemPrompt,
       conversationHistory,
       tools,
@@ -184,8 +168,7 @@ export class AIEngine {
         }
       }
       
-      // Chama o Gemini novamente com os resultados das ferramentas
-      aiResponse = await geminiService.processWithToolResults(
+      aiResponse = await localAI.processWithToolResults(
         systemPrompt,
         conversationHistory,
         aiResponse.rawContent,
@@ -196,9 +179,9 @@ export class AIEngine {
     }
     
     // Gravar Mensagem da IA com Metadados
-    if (channel !== 'whatsapp' && conversation_id) {
-      const estimatedCost = 0; // Gemini Flash é gratuito!
-      await this.supabase.from('messages').insert({
+    if (conversation_id) {
+      const estimatedCost = 0;
+      const { error: assistantSaveError } = await this.supabase.from('messages').insert({
         conversation_id,
         workspace_id,
         sender_id: null,
@@ -213,6 +196,7 @@ export class AIEngine {
           tool_calls: aiResponse.toolCalls
         }
       });
+      if (assistantSaveError) throw new Error('A resposta foi gerada, mas não pôde ser salva.');
     }
 
     return {

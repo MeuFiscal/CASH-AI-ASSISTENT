@@ -3,11 +3,7 @@ export interface AIContextPayload {
   user_id: string;
   conversation_id?: string;
   message: string;
-  history?: { role: string; content: string }[];
-  source?: 'chat' | 'whatsapp';
-  channel?: string;
-  contact_id?: string;
-  message_id?: string;
+  source?: 'chat';
 }
 
 export interface WorkspaceData {

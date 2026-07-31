@@ -14,7 +14,7 @@ CREATE TYPE workspace_type AS ENUM ('personal', 'family', 'business');
 CREATE TYPE user_status AS ENUM ('LOADING', 'ONBOARDING', 'PAYMENT_PENDING', 'ACTIVE', 'BLOCKED', 'TRIAL');
 CREATE TYPE subscription_status AS ENUM ('ACTIVE', 'TRIALING', 'PAST_DUE', 'CANCELED', 'UNPAID');
 CREATE TYPE member_role AS ENUM ('owner', 'admin', 'member', 'accountant', 'partner');
-CREATE TYPE message_source AS ENUM ('whatsapp', 'dashboard', 'system', 'api');
+CREATE TYPE message_source AS ENUM ('chat', 'dashboard', 'system', 'api');
 CREATE TYPE event_status AS ENUM ('pending', 'completed', 'canceled');
 CREATE TYPE transaction_type AS ENUM ('income', 'expense');
 

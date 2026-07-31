@@ -8,7 +8,6 @@ export function Login() {
   const navigate = useNavigate();
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<'password' | 'magic-link'>('password');
@@ -20,20 +19,8 @@ export function Login() {
 
     try {
       if (mode === 'password') {
-        // Se não tiver @, é um telefone. Vamos usar o truque de transformar em email 
-        // para não precisar de verificação por SMS no Supabase.
-        const isEmail = identifier.includes('@');
-        let authIdentifier = identifier;
-        
-        if (!isEmail) {
-          // Remove tudo que não for número
-          const justNumbers = identifier.replace(/\D/g, '');
-          // Adiciona um domínio falso para o Supabase aceitar como email
-          authIdentifier = `${justNumbers}@telefone.cashai.com`;
-        }
-
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
-          email: authIdentifier,
+          email: identifier,
           password: password
         });
 
@@ -45,20 +32,12 @@ export function Login() {
           navigate('/login-transition');
         }
       } else {
-        const isEmail = identifier.includes('@');
-        let authIdentifier = identifier;
-
-        if (!isEmail) {
-          const justNumbers = identifier.replace(/\D/g, '');
-          authIdentifier = `${justNumbers}@telefone.cashai.com`;
-        }
-
         const options = {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         };
 
         const { error: magicLinkError } = await supabase.auth.signInWithOtp({ 
-          email: authIdentifier, 
+          email: identifier,
           options 
         });
 
@@ -90,14 +69,14 @@ export function Login() {
         
         {/* Identifier Field */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[13px] font-medium text-[#A8B3CF]">Email ou Telefone</label>
+          <label className="text-[13px] font-medium text-[#A8B3CF]">E-mail</label>
           <div className="relative">
             <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7B879D]" />
             <input 
-              type="text" 
+              type="email"
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
-              placeholder="seu@email.com ou (11) 90000-0000"
+              placeholder="seu@email.com"
               className="w-full bg-[#0B1221]/50 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-[14px] text-white placeholder:text-[#7B879D] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 focus:border-[#3B82F6] transition-all"
               required
             />
@@ -124,22 +103,6 @@ export function Login() {
                 required
               />
             </div>
-          </div>
-        )}
-
-        {/* Remember Me */}
-        {mode === 'password' && (
-          <div className="flex items-center gap-2 mt-1">
-            <input 
-              type="checkbox" 
-              id="remember" 
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-4 h-4 rounded bg-[#0B1221] border-white/10 text-[#3B82F6] focus:ring-[#3B82F6]"
-            />
-            <label htmlFor="remember" className="text-[13px] text-[#A8B3CF] cursor-pointer select-none">
-              Manter conectado
-            </label>
           </div>
         )}
 

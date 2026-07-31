@@ -20,7 +20,6 @@ DECLARE
     v_total_users INT;
     v_total_workspaces INT;
     v_conversations_today INT;
-    v_whatsapp_messages INT;
     v_mrr NUMERIC;
     v_active_subscriptions INT;
     v_ai_tokens_used INT;
@@ -35,10 +34,6 @@ BEGIN
     
     SELECT COUNT(*) INTO v_conversations_today 
     FROM public.conversations 
-    WHERE DATE(created_at) = CURRENT_DATE;
-
-    SELECT COUNT(*) INTO v_whatsapp_messages 
-    FROM public.whatsapp_messages 
     WHERE DATE(created_at) = CURRENT_DATE;
 
     SELECT COALESCE(SUM(p.price), 0) INTO v_mrr 
@@ -60,7 +55,6 @@ BEGIN
         'active_users', v_total_users, -- Simplificado por enquanto
         'workspaces', v_total_workspaces,
         'conversations_today', v_conversations_today,
-        'whatsapp_messages', v_whatsapp_messages,
         'mrr', v_mrr,
         'active_subscriptions', v_active_subscriptions,
         'ai_tokens_used', v_ai_tokens_used,
@@ -157,45 +151,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 
--- 4. admin_get_whatsapp()
-CREATE OR REPLACE FUNCTION admin_get_whatsapp()
-RETURNS JSONB AS $$
-DECLARE
-    v_result JSONB;
-BEGIN
-    IF NOT admin_check_access() THEN
-        RAISE EXCEPTION 'Acesso negado';
-    END IF;
-
-    SELECT COALESCE(
-        (SELECT jsonb_agg(
-            jsonb_build_object(
-                'id', sub.id,
-                'workspace_name', sub.name,
-                'phone_number', sub.phone_number,
-                'status', sub.status,
-                'last_sync', sub.updated_at,
-                'last_message', (
-                    SELECT created_at 
-                    FROM public.whatsapp_messages 
-                    WHERE whatsapp_account_id = sub.id 
-                    ORDER BY created_at DESC LIMIT 1
-                )
-            )
-        ) FROM (
-            SELECT wa.id, wa.phone_number, wa.status, wa.updated_at, w.name
-            FROM public.whatsapp_accounts wa
-            JOIN public.workspaces w ON w.id = wa.workspace_id
-            ORDER BY wa.updated_at DESC
-        ) sub), '[]'::jsonb
-    ) INTO v_result;
-
-    RETURN v_result;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
-
--- 5. admin_get_openai_usage()
+-- 4. admin_get_openai_usage()
 CREATE OR REPLACE FUNCTION admin_get_openai_usage()
 RETURNS JSONB AS $$
 DECLARE
@@ -265,8 +221,7 @@ BEGIN
         'supabase', 'operational',
         'realtime', 'operational',
         'storage', 'operational',
-        'whatsapp', 'operational',
-        'openai', 'operational',
+        'local_ai', 'operational',
         'edge_functions', 'operational',
         'last_errors', '[]'::jsonb
     );

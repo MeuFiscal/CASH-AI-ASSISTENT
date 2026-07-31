@@ -29,7 +29,6 @@ DECLARE
     v_finance JSONB;
     v_agenda JSONB;
     v_priorities JSONB;
-    v_recent_messages JSONB;
     v_result JSONB;
 BEGIN
     -- Valida acesso (garante que quem chama pertence ao workspace)
@@ -59,22 +58,10 @@ BEGIN
     ) INTO v_priorities FROM insights 
     WHERE workspace_id = p_workspace_id AND is_read = false AND type = 'priority';
 
-    -- Agrega Mensagens Recentes do WhatsApp
-    SELECT jsonb_agg(
-        jsonb_build_object('id', sub.id, 'content', sub.content, 'created_at', sub.created_at)
-    ) INTO v_recent_messages 
-    FROM (
-        SELECT id, content, created_at 
-        FROM whatsapp_messages 
-        WHERE workspace_id = p_workspace_id 
-        ORDER BY created_at DESC LIMIT 5
-    ) sub;
-
     v_result := jsonb_build_object(
         'finances', COALESCE(v_finance, '{}'::jsonb),
         'agenda', COALESCE(v_agenda, '[]'::jsonb),
-        'priorities', COALESCE(v_priorities, '[]'::jsonb),
-        'whatsapp', COALESCE(v_recent_messages, '[]'::jsonb)
+        'priorities', COALESCE(v_priorities, '[]'::jsonb)
     );
 
     RETURN v_result;

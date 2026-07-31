@@ -16,7 +16,6 @@ export function RecentEventsTimeline({ events, loading }: { events: EventLog[], 
       case 'error': return { icon: AlertCircle, color: 'text-red-400', bg: 'bg-red-400/10' };
       case 'webhook': return { icon: Zap, color: 'text-purple-400', bg: 'bg-purple-400/10' };
       case 'workspace_created': return { icon: PlayCircle, color: 'text-orange-400', bg: 'bg-orange-400/10' };
-      case 'workspace_created': return { icon: PlayCircle, color: 'text-orange-400', bg: 'bg-orange-400/10' };
       default: return { icon: Clock, color: 'text-gray-400', bg: 'bg-gray-400/10' };
     }
   };

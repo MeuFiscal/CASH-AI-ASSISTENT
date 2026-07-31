@@ -24,19 +24,12 @@ export interface DashboardInsight {
   description: string;
 }
 
-export interface DashboardWhatsappMessage {
-  id: string;
-  content: string;
-  created_at: string;
-}
-
 export interface DashboardData {
   status: DashboardStateStatus;
   workspace: DashboardWorkspaceData;
   financial: DashboardFinancialData;
   agenda: DashboardAgendaEvent[];
   priorities: DashboardInsight[];
-  whatsapp: DashboardWhatsappMessage[];
   memory: any; // expand later
   insights: any; // expand later
   documents: any; // expand later

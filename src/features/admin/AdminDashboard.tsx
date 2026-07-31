@@ -9,10 +9,8 @@ import { SmartAlerts } from './pages/dashboard/components/SmartAlerts';
 import { TopWorkspacesTable } from './pages/dashboard/components/TopWorkspacesTable';
 import { RecentEventsTimeline } from './pages/dashboard/components/RecentEventsTimeline';
 import { AiUsageCard } from './pages/dashboard/components/AiUsageCard';
-import { WhatsAppStats } from './pages/dashboard/components/WhatsAppStats';
 import { FinancialPanel } from './pages/dashboard/components/FinancialPanel';
 import { UsersMap } from './pages/dashboard/components/UsersMap';
-import { IntelligenceCenter } from './pages/dashboard/components/intelligence/IntelligenceCenter';
 import { useSmartPolling } from '@/hooks/useSmartPolling';
 
 export function AdminDashboard() {
@@ -77,21 +75,15 @@ export function AdminDashboard() {
             </div>
             <TopWorkspacesTable workspaces={topWorkspaces} loading={loading} />
             
-            {/* Centro de Inteligência agora é o destaque final ocupando 2 colunas */}
-            <div className="mt-2">
-              <IntelligenceCenter />
-            </div>
           </div>
           <div className="flex flex-col gap-4">
             <SystemHealthPanel loading={loading} />
             <SmartAlerts alerts={alerts} loading={loading} />
             <RecentEventsTimeline events={events} loading={loading} />
             <AiUsageCard stats={metrics} loading={loading} />
-            <WhatsAppStats stats={metrics} loading={loading} />
           </div>
         </div>
       </div>
     </AdminLayout>
   );
 }
-

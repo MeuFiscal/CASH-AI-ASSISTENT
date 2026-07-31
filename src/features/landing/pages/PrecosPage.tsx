@@ -5,7 +5,7 @@ import { PremiumBackground } from '../components/PremiumBackground';
 
 const benefits = [
   "Registro ilimitado de gastos",
-  "Integração com WhatsApp",
+  "Assistente privado no painel",
   "Sincronização com Google Agenda",
   "Relatórios e gráficos detalhados",
   "Suporte VIP prioritário",

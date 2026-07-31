@@ -9,7 +9,7 @@ BEGIN
     IF NOT admin_check_access() THEN RAISE EXCEPTION 'Acesso negado'; END IF;
     
     INSERT INTO public.user_roles (user_id, role)
-    VALUES (p_user_id, p_role::app_role)
+    VALUES (p_user_id, p_role::global_role)
     ON CONFLICT (user_id) DO UPDATE SET role = EXCLUDED.role;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

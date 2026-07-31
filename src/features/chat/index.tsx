@@ -87,14 +87,6 @@ export function Chat() {
     setMessages(prev => [...prev, newMsg]);
     setInput('');
 
-    // Prepara o histórico
-    const history = messages
-      .filter(m => m.id !== '1' && !m.id.startsWith('temp-')) 
-      .map(m => ({
-        role: m.role === 'ai' ? 'assistant' : 'user',
-        content: m.text
-      }));
-    
     try {
       const { data, error } = await supabase.functions.invoke('openai_core', {
         body: {
@@ -102,7 +94,6 @@ export function Chat() {
           user_id: user?.id,
           conversation_id: conversationId,
           message: userMessage,
-          history: history,
           source: 'chat'
         }
       });
@@ -119,10 +110,10 @@ export function Chat() {
           text: data.response
         }]);
       } else {
-        throw new Error(data?.error || 'Erro desconhecido na API');
+        throw new Error(data?.error || 'Erro desconhecido no núcleo local');
       }
     } catch (err) {
-      console.error('Erro ao chamar OpenAI Core:', err);
+      console.error('Erro ao chamar o núcleo local:', err);
       setMessages(prev => [...prev, {
         id: Date.now().toString() + 'err',
         role: 'ai',

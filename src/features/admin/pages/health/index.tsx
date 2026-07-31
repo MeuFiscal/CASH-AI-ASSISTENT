@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
 import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '@/lib/supabase';
-import { Database, Zap, HardDrive, Smartphone, BrainCircuit, Code } from 'lucide-react';
+import { Database, Zap, HardDrive, BrainCircuit, Code } from 'lucide-react';
 
 interface SystemHealth {
   supabase: string;
   realtime: string;
   storage: string;
-  whatsapp: string;
-  openai: string;
+  local_ai: string;
   edge_functions: string;
   last_errors: any[];
 }
@@ -49,8 +48,7 @@ export function AdminHealth() {
     { name: 'Supabase DB', icon: Database, key: 'supabase' },
     { name: 'Realtime', icon: Zap, key: 'realtime' },
     { name: 'Storage', icon: HardDrive, key: 'storage' },
-    { name: 'WhatsApp API', icon: Smartphone, key: 'whatsapp' },
-    { name: 'OpenAI API', icon: BrainCircuit, key: 'openai' },
+    { name: 'IA Local', icon: BrainCircuit, key: 'local_ai' },
     { name: 'Edge Functions', icon: Code, key: 'edge_functions' },
   ];
 
