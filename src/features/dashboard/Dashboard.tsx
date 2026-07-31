@@ -8,6 +8,7 @@ import { RecentActivityCard } from './widgets/RecentActivityCard';
 import { LearningCard } from './widgets/LearningCard';
 import { MemoryCard } from './widgets/MemoryCard';
 import { ProgressCard } from './widgets/ProgressCard';
+import { QuickActions } from './components/QuickActions';
 
 import { DashboardProvider } from './contexts/DashboardContext';
 
@@ -18,6 +19,8 @@ export function Dashboard() {
         <PageContainer>
         {/* Cabeçalho de Saudação */}
         <GreetingHeader />
+
+        <QuickActions />
 
         {/* Grid Architecture Sprint 4.2 */}
         <div className="flex flex-col gap-6">
