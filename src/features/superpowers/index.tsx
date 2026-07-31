@@ -1,140 +1,88 @@
-import { useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Calendar, Database, Mail, RefreshCw, Link2, Unplug, CheckCircle2, AlertCircle } from 'lucide-react';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
-import { Zap, Calendar, Database, Mail, Lock, Crown, X } from 'lucide-react';
 import { PageContainer } from '@/components/PageContainer';
 import { PageHeader } from '@/components/PageHeader';
 import { PageSection } from '@/components/PageSection';
-import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 
-export function Superpowers() {
-  const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
-  const navigate = useNavigate();
-  const { globalRole } = useAuth();
+const services = [
+  { icon: Calendar, name: 'Google Agenda', key: 'calendar', color: 'text-blue-400', text: 'Busca seus eventos e os organiza na agenda do Cash AI.' },
+  { icon: Database, name: 'Google Drive', key: 'drive', color: 'text-emerald-400', text: 'Importa a lista de documentos autorizados para busca no painel.' },
+  { icon: Mail, name: 'Gmail', key: 'gmail', color: 'text-red-400', text: 'Busca os e-mails recentes em modo somente leitura.' },
+];
 
-  const handlePremiumClick = () => {
-    if (globalRole === 'super_admin') {
-      alert('Acesso liberado para Superadmin. A configuração desta integração estará disponível em breve.');
-      return;
-    }
-    setIsPremiumModalOpen(true);
+export function Superpowers() {
+  const { user } = useAuth();
+  const [params, setParams] = useSearchParams();
+  const [integration, setIntegration] = useState<{ account_email?: string; updated_at?: string } | null>(null);
+  const [counts, setCounts] = useState<Record<string, number>>({});
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const loadStatus = useCallback(async () => {
+    if (!user?.id) return;
+    const { data: member } = await supabase.from('workspace_members').select('workspace_id').eq('user_id', user.id).limit(1).maybeSingle();
+    if (!member) return;
+    const { data } = await supabase.from('integrations').select('account_email, updated_at').eq('workspace_id', member.workspace_id).eq('provider', 'google').maybeSingle();
+    setIntegration(data);
+  }, [user]);
+
+  useEffect(() => { loadStatus(); }, [loadStatus]);
+  useEffect(() => {
+    if (params.get('google') === 'connected') { setMessage('Conta Google conectada. Sincronizando os dados...'); setParams({}, { replace: true }); loadStatus().then(() => sync()); }
+    if (params.get('google') === 'error') { setMessage(params.get('message') || 'Não foi possível conectar o Google.'); setParams({}, { replace: true }); }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const connect = async () => {
+    setLoading(true); setMessage('');
+    const { data, error } = await supabase.functions.invoke('google-oauth-start');
+    if (error || !data?.url) { setMessage(error?.message || data?.error || 'Não foi possível iniciar a conexão.'); setLoading(false); return; }
+    window.location.href = data.url;
   };
 
-  return (
-    <DashboardLayout>
-      <PageContainer>
-        <PageHeader 
-          icon={Zap}
-          title="Superpoderes"
-          subtitle="Conecte sua IA aos aplicativos que você já usa."
-        />
+  const sync = async () => {
+    setLoading(true); setMessage('Sincronizando Agenda, Drive e Gmail...');
+    const { data, error } = await supabase.functions.invoke('google-sync', { body: { action: 'sync' } });
+    setLoading(false);
+    if (error || data?.error) { setMessage(data?.error || error?.message || 'Falha na sincronização.'); return; }
+    setCounts(data); setMessage('Sincronização concluída com sucesso.'); await loadStatus();
+  };
 
-        <PageSection title="Conexões Disponíveis">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Google Agenda */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-[#181C28]/60 border border-white/5 backdrop-blur-xl relative overflow-hidden group hover:bg-[#181C28]/80 transition-colors flex flex-col h-full">
-            <div className="flex items-center gap-3 mb-2">
-              <Calendar className="w-6 h-6 text-[#3B82F6]" />
-              <h2 className="text-2xl font-bold text-white tracking-tight">Google Agenda</h2>
-            </div>
-            <p className="text-[#A8B3CF] text-[15px] leading-relaxed mb-6 font-medium">
-              Nunca mais esqueça reuniões.<br />
-              Tudo sincronizado automaticamente.
-            </p>
-            <div className="mt-auto">
-              <button onClick={handlePremiumClick} className="w-full sm:w-auto px-6 py-3 rounded-full bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold transition-colors">
-                Conectar
-              </button>
-            </div>
-          </div>
+  const disconnect = async () => {
+    if (!confirm('Desconectar a conta Google? Os dados já importados permanecerão no Cash AI.')) return;
+    setLoading(true);
+    const { data, error } = await supabase.functions.invoke('google-sync', { body: { action: 'disconnect' } });
+    setLoading(false);
+    if (error || data?.error) { setMessage(data?.error || error?.message); return; }
+    setIntegration(null); setCounts({}); setMessage('Conta Google desconectada.');
+  };
 
-          {/* Google Drive */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-[#181C28]/60 border border-white/5 backdrop-blur-xl relative overflow-hidden group hover:bg-[#181C28]/80 transition-colors flex flex-col h-full">
-            <div className="flex items-center gap-3 mb-2">
-              <Database className="w-6 h-6 text-[#10B981]" />
-              <h2 className="text-2xl font-bold text-white tracking-tight">Google Drive</h2>
-            </div>
-            <p className="text-[#A8B3CF] text-[15px] leading-relaxed mb-6 font-medium">
-              Sua IA lê seus documentos.<br />
-              Resumos e buscas instantâneas.
-            </p>
-            <div className="mt-auto">
-              <button onClick={handlePremiumClick} className="w-full sm:w-auto px-6 py-3 rounded-full bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold transition-colors">
-                Conectar
-              </button>
-            </div>
-          </div>
-
-          {/* Gmail */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-[#181C28]/60 border border-white/5 backdrop-blur-xl relative overflow-hidden group hover:bg-[#181C28]/80 transition-colors flex flex-col h-full">
-            <div className="flex items-center gap-3 mb-2">
-              <Mail className="w-6 h-6 text-[#ef4444]" />
-              <h2 className="text-2xl font-bold text-white tracking-tight">Gmail</h2>
-            </div>
-            <p className="text-[#A8B3CF] text-[15px] leading-relaxed mb-6 font-medium">
-              A IA lê boletos enviados por email.<br />
-              Lembretes automáticos de vencimento.
-            </p>
-            <div className="mt-auto">
-              <button className="w-full sm:w-auto px-6 py-3 rounded-full bg-white/5 border border-white/5 text-[#A8B3CF] font-medium cursor-not-allowed">
-                Em breve
-              </button>
-            </div>
-          </div>
-          </div>
-
-        </PageSection>
-
-        {/* Premium Glassmorphism Modal */}
-        {isPremiumModalOpen && createPortal(
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-[#0B1221]/80 backdrop-blur-md" onClick={() => setIsPremiumModalOpen(false)} />
-            
-            <div className="relative w-[90vw] max-w-md min-w-[320px] sm:min-w-[400px] bg-[#181C28]/90 border border-[#F59E0B]/30 rounded-3xl p-8 shadow-[0_0_50px_rgba(245,158,11,0.15)] animate-in zoom-in-95 duration-300">
-              <button 
-                onClick={() => setIsPremiumModalOpen(false)}
-                className="absolute top-6 right-6 text-[#A8B3CF] hover:text-white transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              <div className="flex justify-center mb-6">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#F59E0B] to-[#D97706] flex items-center justify-center shadow-lg shadow-[#F59E0B]/20">
-                  <Lock className="w-8 h-8 text-white" />
-                </div>
-              </div>
-
-              <h3 className="text-2xl font-bold text-white text-center mb-2">Recurso Premium</h3>
-              <p className="text-[#A8B3CF] text-center text-[15px] leading-relaxed mb-8">
-                As conexões externas e integrações com aplicativos são exclusivas para assinantes do plano Premium do Cash AI.
-              </p>
-
-              <div className="flex flex-col gap-3">
-                <button 
-                  onClick={() => {
-                    setIsPremiumModalOpen(false);
-                    navigate('/premium');
-                  }}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-[#F59E0B] to-[#D97706] text-white font-bold text-[15px] hover:shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all"
-                >
-                  <Crown className="w-5 h-5" />
-                  Fazer Upgrade Agora
-                </button>
-                
-                <button 
-                  onClick={() => setIsPremiumModalOpen(false)}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium transition-colors"
-                >
-                  Continuar no Grátis
-                </button>
-              </div>
-            </div>
-          </div>,
-          document.body
-        )}
-
-      </PageContainer>
-    </DashboardLayout>
-  );
+  return <DashboardLayout><PageContainer>
+    <PageHeader icon={Link2} title="Superpoderes" subtitle="Conecte sua conta Google e mantenha suas informações sincronizadas." />
+    <div className="mb-8 rounded-3xl border border-white/10 bg-gradient-to-r from-blue-500/10 to-emerald-500/10 p-6 sm:p-8">
+      <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
+        <div className="flex items-start gap-4">
+          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${integration ? 'bg-emerald-500/15' : 'bg-blue-500/15'}`}>{integration ? <CheckCircle2 className="h-6 w-6 text-emerald-400" /> : <Link2 className="h-6 w-6 text-blue-400" />}</div>
+          <div><h2 className="text-xl font-bold text-white">{integration ? 'Google conectado' : 'Conecte sua conta Google'}</h2><p className="mt-1 text-sm text-[#A8B3CF]">{integration?.account_email || 'Uma autorização conecta Agenda, Drive e Gmail em modo seguro.'}</p></div>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          {integration ? <><button onClick={sync} disabled={loading} className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-bold text-white hover:bg-blue-500 disabled:opacity-50"><RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />Sincronizar agora</button><button onClick={disconnect} disabled={loading} className="flex items-center gap-2 rounded-xl border border-white/10 px-5 py-3 font-medium text-[#A8B3CF] hover:bg-white/5 hover:text-white"><Unplug className="h-4 w-4" />Desconectar</button></> : <button onClick={connect} disabled={loading} className="flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-bold text-white hover:bg-blue-500 disabled:opacity-50"><Link2 className="h-4 w-4" />{loading ? 'Abrindo Google...' : 'Conectar com Google'}</button>}
+        </div>
+      </div>
+      {message && <div className="mt-5 flex items-center gap-2 rounded-xl border border-white/10 bg-black/20 p-3 text-sm text-[#D7DEEE]"><AlertCircle className="h-4 w-4 shrink-0 text-blue-400" />{message}</div>}
+    </div>
+    <PageSection title="Serviços Google">
+      <div className="grid gap-6 md:grid-cols-3">
+        {services.map(({ icon: Icon, name, key, color, text }) => <div key={key} className="rounded-3xl border border-white/10 bg-[#181C28]/60 p-7 backdrop-blur-xl">
+          <div className="flex items-center justify-between"><Icon className={`h-7 w-7 ${color}`} />{integration && <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400">Conectado</span>}</div>
+          <h3 className="mt-6 text-xl font-bold text-white">{name}</h3><p className="mt-3 min-h-[64px] text-sm leading-relaxed text-[#A8B3CF]">{text}</p>
+          {counts[key] !== undefined && <p className="mt-5 text-sm font-bold text-white">{counts[key]} itens sincronizados</p>}
+        </div>)}
+      </div>
+    </PageSection>
+  </PageContainer></DashboardLayout>;
 }
